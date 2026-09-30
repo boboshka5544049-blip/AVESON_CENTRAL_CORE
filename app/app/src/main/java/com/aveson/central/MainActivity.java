@@ -28,8 +28,18 @@ public class MainActivity extends Activity {
     private LinearLayout mainContainer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    TextView test = new TextView(this);
+    test.setText("AVESON CENTRAL TEST");
+    test.setTextColor(Color.WHITE);
+    test.setTextSize(25);
+    test.setGravity(Gravity.CENTER);
+    test.setBackgroundColor(Color.rgb(8, 8, 18));
+
+    setContentView(test);
+}
 
         showCentralHome();
     }
