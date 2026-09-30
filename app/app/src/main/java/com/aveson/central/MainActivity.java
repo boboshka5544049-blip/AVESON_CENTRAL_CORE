@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -28,18 +27,8 @@ public class MainActivity extends Activity {
     private LinearLayout mainContainer;
 
     @Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    TextView test = new TextView(this);
-    test.setText("AVESON CENTRAL TEST");
-    test.setTextColor(Color.WHITE);
-    test.setTextSize(25);
-    test.setGravity(Gravity.CENTER);
-    test.setBackgroundColor(Color.rgb(8, 8, 18));
-
-    setContentView(test);
-}
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         showCentralHome();
     }
@@ -52,14 +41,12 @@ protected void onCreate(Bundle savedInstanceState) {
 
         LinearLayout layout = createRoot();
 
-        // MENU
         addMenuButton(
                 layout,
                 "☰  MENU",
                 v -> showGlobalMenu()
         );
 
-        // TITLE
         layout.addView(
                 createTitle("AVESON CENTRAL")
         );
@@ -70,18 +57,13 @@ protected void onCreate(Bundle savedInstanceState) {
                 )
         );
 
-        // STATUS
-        TextView status = createStatus("●  SYSTEM ONLINE");
-        layout.addView(status);
+        layout.addView(
+                createStatus("●  SYSTEM ONLINE")
+        );
 
-        // SECTION
         layout.addView(
                 createSectionTitle("CONTROL ROOMS")
         );
-
-        // ========================================================
-        // CONTROL ROOMS
-        // ========================================================
 
         addRoomButton(
                 layout,
@@ -173,15 +155,17 @@ protected void onCreate(Bundle savedInstanceState) {
                 )
         );
 
-        // FOOTER
         TextView footer = new TextView(this);
+
         footer.setText(
                 "\nAVESON CENTRAL\n" +
                 "Global Music Ecosystem Control\n\n"
         );
+
         footer.setTextColor(TEXT_GRAY);
         footer.setTextSize(12);
         footer.setGravity(Gravity.CENTER);
+
         footer.setPadding(
                 dp(16),
                 dp(20),
@@ -262,7 +246,7 @@ protected void onCreate(Bundle savedInstanceState) {
     }
 
     // ============================================================
-    // CONTROL ROOM SCREEN
+    // CONTROL ROOM
     // ============================================================
 
     private void showControlRoom(
@@ -286,11 +270,9 @@ protected void onCreate(Bundle savedInstanceState) {
                 createSubtitle(description)
         );
 
-        TextView status = createStatus(
-                "●  CONTROL ROOM READY"
+        layout.addView(
+                createStatus("●  CONTROL ROOM READY")
         );
-
-        layout.addView(status);
 
         LinearLayout card = createCard();
 
@@ -1221,11 +1203,9 @@ protected void onCreate(Bundle savedInstanceState) {
                 )
         );
 
-        TextView ready = createStatus(
-                "●  READY"
+        layout.addView(
+                createStatus("●  READY")
         );
-
-        layout.addView(ready);
 
         LinearLayout card = createCard();
 
@@ -1286,7 +1266,6 @@ protected void onCreate(Bundle savedInstanceState) {
                 new ScrollView(this);
 
         scrollView.setFillViewport(true);
-
         scrollView.setBackgroundColor(DARK);
 
         scrollView.addView(content);
@@ -1323,14 +1302,9 @@ protected void onCreate(Bundle savedInstanceState) {
                 new TextView(this);
 
         title.setText(text);
-
         title.setTextColor(TEXT);
-
         title.setTextSize(25);
-
-        title.setGravity(
-                Gravity.CENTER
-        );
+        title.setGravity(Gravity.CENTER);
 
         title.setTypeface(
                 null,
@@ -1355,14 +1329,9 @@ protected void onCreate(Bundle savedInstanceState) {
                 new TextView(this);
 
         subtitle.setText(text);
-
         subtitle.setTextColor(TEXT_GRAY);
-
         subtitle.setTextSize(13);
-
-        subtitle.setGravity(
-                Gravity.CENTER
-        );
+        subtitle.setGravity(Gravity.CENTER);
 
         subtitle.setPadding(
                 dp(8),
@@ -1382,14 +1351,9 @@ protected void onCreate(Bundle savedInstanceState) {
                 new TextView(this);
 
         status.setText(text);
-
         status.setTextColor(GREEN);
-
         status.setTextSize(13);
-
-        status.setGravity(
-                Gravity.CENTER
-        );
+        status.setGravity(Gravity.CENTER);
 
         status.setPadding(
                 dp(8),
@@ -1409,9 +1373,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 new TextView(this);
 
         title.setText(text);
-
         title.setTextColor(PURPLE);
-
         title.setTextSize(13);
 
         title.setTypeface(
@@ -1440,14 +1402,9 @@ protected void onCreate(Bundle savedInstanceState) {
     ) {
 
         Button button =
-                createButton(
-                        text,
-                        PURPLE
-                );
+                createButton(text, PURPLE);
 
-        button.setOnClickListener(
-                listener
-        );
+        button.setOnClickListener(listener);
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -1462,10 +1419,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 dp(14)
         );
 
-        layout.addView(
-                button,
-                params
-        );
+        layout.addView(button, params);
     }
 
     private void addRoomButton(
@@ -1503,17 +1457,13 @@ protected void onCreate(Bundle savedInstanceState) {
                 Color.rgb(70, 55, 120)
         );
 
-        card.setBackground(
-                background
-        );
+        card.setBackground(background);
 
         TextView titleView =
                 new TextView(this);
 
         titleView.setText(title);
-
         titleView.setTextColor(TEXT);
-
         titleView.setTextSize(16);
 
         titleView.setTypeface(
@@ -1525,9 +1475,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 new TextView(this);
 
         subtitleView.setText(subtitle);
-
         subtitleView.setTextColor(TEXT_GRAY);
-
         subtitleView.setTextSize(12);
 
         subtitleView.setPadding(
@@ -1538,12 +1486,9 @@ protected void onCreate(Bundle savedInstanceState) {
         );
 
         card.addView(titleView);
-
         card.addView(subtitleView);
 
-        card.setOnClickListener(
-                listener
-        );
+        card.setOnClickListener(listener);
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -1558,10 +1503,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 dp(6)
         );
 
-        layout.addView(
-                card,
-                params
-        );
+        layout.addView(card, params);
     }
 
     private void addMenuItem(
@@ -1597,14 +1539,9 @@ protected void onCreate(Bundle savedInstanceState) {
     ) {
 
         Button button =
-                createButton(
-                        text,
-                        BLUE
-                );
+                createButton(text, BLUE);
 
-        button.setOnClickListener(
-                listener
-        );
+        button.setOnClickListener(listener);
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -1619,10 +1556,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 dp(6)
         );
 
-        layout.addView(
-                button,
-                params
-        );
+        layout.addView(button, params);
     }
 
     private Button createButton(
@@ -1634,34 +1568,23 @@ protected void onCreate(Bundle savedInstanceState) {
                 new Button(this);
 
         button.setText(text);
-
         button.setTextColor(TEXT);
-
         button.setTextSize(14);
-
-        button.setGravity(
-                Gravity.CENTER
-        );
-
+        button.setGravity(Gravity.CENTER);
         button.setAllCaps(false);
 
         GradientDrawable background =
                 new GradientDrawable();
 
         background.setColor(CARD);
-
-        background.setCornerRadius(
-                dp(14)
-        );
+        background.setCornerRadius(dp(14));
 
         background.setStroke(
                 dp(1),
                 strokeColor
         );
 
-        button.setBackground(
-                background
-        );
+        button.setBackground(background);
 
         button.setPadding(
                 dp(12),
@@ -1697,19 +1620,14 @@ protected void onCreate(Bundle savedInstanceState) {
                 new GradientDrawable();
 
         background.setColor(CARD);
-
-        background.setCornerRadius(
-                dp(16)
-        );
+        background.setCornerRadius(dp(16));
 
         background.setStroke(
                 dp(1),
                 Color.rgb(55, 45, 90)
         );
 
-        card.setBackground(
-                background
-        );
+        card.setBackground(background);
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -1743,7 +1661,6 @@ protected void onCreate(Bundle savedInstanceState) {
         );
 
         text.setTextColor(TEXT_GRAY);
-
         text.setTextSize(13);
 
         text.setPadding(
@@ -1773,7 +1690,6 @@ protected void onCreate(Bundle savedInstanceState) {
         );
 
         text.setTextColor(TEXT);
-
         text.setTextSize(14);
 
         card.addView(text);
@@ -1787,7 +1703,6 @@ protected void onCreate(Bundle savedInstanceState) {
 
     @Override
     public void onBackPressed() {
-
         showCentralHome();
     }
 
@@ -1804,4 +1719,4 @@ protected void onCreate(Bundle savedInstanceState) {
                         .density
         );
     }
-    }
+                   }
