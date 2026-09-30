@@ -1719,4 +1719,4 @@ public class MainActivity extends Activity {
                         .density
         );
     }
-                   }
+            }
