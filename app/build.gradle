@@ -7,7 +7,7 @@ android {
     compileSdk 35
 
     defaultConfig {
-        applicationId 'com.aveson.central'
+        applicationId 'com.aveson.central.core'
         minSdk 24
         targetSdk 35
         versionCode 1
@@ -17,7 +17,14 @@ android {
     sourceSets {
         main {
             java.srcDirs = ['src/main/java']
+            res.srcDirs = ['src/main/res']
+            manifest.srcFile 'src/main/AndroidManifest.xml'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
