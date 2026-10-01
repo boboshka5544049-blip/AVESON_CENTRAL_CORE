@@ -1,4 +1,4 @@
-name: Build AVESON CENTRAL APK
+name: Build AVESON CENTRAL CORE APK
 
 on:
   workflow_dispatch:
@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -23,11 +24,36 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Check Project Files
+        run: |
+          echo "=== PROJECT ==="
+          pwd
+
+          echo "=== MAIN FILES ==="
+          find app/src/main -type f -print
+
+          echo "=== JAVA FILES ==="
+          find app/src/main -type f -name "*.java" -print
+
+          echo "=== MAIN ACTIVITY ==="
+          if [ -f app/src/main/java/com/aveson/central/MainActivity.java ]; then
+            echo "MainActivity.java FOUND"
+          else
+            echo "ERROR: MainActivity.java NOT FOUND"
+            exit 1
+          fi
+
       - name: Build APK
-        run: gradle clean assembleDebug
+        run: |
+          gradle clean assembleDebug
+
+      - name: Check APK
+        run: |
+          echo "=== APK ==="
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AVESON-CENTRAL-APK
+          name: AVESON-CENTRAL-CORE-APK
           path: app/build/outputs/apk/debug/app-debug.apk
