@@ -31,7 +31,10 @@ public class CentralMenu {
     }
 
     public void show() {
-        showGlobalMenu();
+        new CentralMenu(
+        this,
+        this::showCentralHome
+).show()
     }
 
     // =========================================================
