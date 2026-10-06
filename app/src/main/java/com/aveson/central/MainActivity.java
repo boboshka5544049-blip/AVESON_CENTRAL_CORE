@@ -41,10 +41,13 @@ public class MainActivity extends Activity {
         LinearLayout layout = createRoot();
 
         addMenuButton(
-                layout,
-                "☰  MENU",
-                v -> showMenu()
-        );
+        layout,
+        "☰  MENU",
+        v -> new CentralMenu(
+                this,
+                this::showHome
+        ).show()
+);
 
         layout.addView(
                 createTitle("AVESON CENTRAL")
