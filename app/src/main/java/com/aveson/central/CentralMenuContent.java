@@ -767,4 +767,14 @@ public class CentralMenuContent {
     }
 
 
+
+private void addInfoToLayout(
+        LinearLayout layout,
+        String label,
+        String value
+) {
+    LinearLayout card = createCard();
+    addInfo(card, label, value);
+    layout.addView(card);
 }
+
