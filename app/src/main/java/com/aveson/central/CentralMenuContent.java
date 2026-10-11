@@ -777,4 +777,4 @@ private void addInfoToLayout(
     addInfo(card, label, value);
     layout.addView(card);
 }
-
+}
