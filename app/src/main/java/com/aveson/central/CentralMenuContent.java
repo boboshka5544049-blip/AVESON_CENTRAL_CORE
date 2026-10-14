@@ -103,41 +103,70 @@ public class CentralMenuContent {
         layout.addView(createSubtitle("Global AVESON statistics and insights"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Active Artists", "1,248");
-        addInfo(card, "Music Releases", "3,842");
-        addInfo(card, "Distribution Platforms", "18");
-        addInfo(card, "Studio Projects", "486");
-        addInfo(card, "Magazine Articles", "274");
-        addInfo(card, "Film Projects", "52");
+        addInfo(card, "Live Data", "Not connected");
+        addInfo(card, "Statistics", "Will appear when the relevant data sources are connected");
+        addInfo(card, "Reporting", "Analytics sections are organized below");
         layout.addView(card);
 
         layout.addView(createSubtitle("ROOM ANALYTICS"));
-
-        addSectionButton(layout, "🎵 Artist Analytics",
-                "Artists, submissions and releases",
-                v -> showMessage("Artist Analytics"));
-
-        addSectionButton(layout, "🎼 Music Analytics",
-                "Catalog, users and playlists",
-                v -> showMessage("Music Analytics"));
-
-        addSectionButton(layout, "🌍 Distribution Analytics",
-                "Platforms and delivery",
-                v -> showMessage("Distribution Analytics"));
-
-        addSectionButton(layout, "🎙️ Studio Analytics",
-                "Projects and production",
-                v -> showMessage("Studio Analytics"));
-
-        addSectionButton(layout, "📰 Magazine Analytics",
-                "Editorial and audience",
-                v -> showMessage("Magazine Analytics"));
-
-        addSectionButton(layout, "🎬 Film Analytics",
-                "Film and video performance",
-                v -> showMessage("Film Analytics"));
+        addSectionButton(layout, "🎵 Artist Analytics", "Artists, submissions and releases",
+                v -> showAnalyticsDetail("Artist Analytics"));
+        addSectionButton(layout, "🎼 Music Analytics", "Catalog, users and playlists",
+                v -> showAnalyticsDetail("Music Analytics"));
+        addSectionButton(layout, "🌍 Distribution Analytics", "Platforms and delivery",
+                v -> showAnalyticsDetail("Distribution Analytics"));
+        addSectionButton(layout, "🎙️ Studio Analytics", "Projects and production",
+                v -> showAnalyticsDetail("Studio Analytics"));
+        addSectionButton(layout, "📰 Magazine Analytics", "Editorial and audience",
+                v -> showAnalyticsDetail("Magazine Analytics"));
+        addSectionButton(layout, "🎬 Film Analytics", "Film and video performance",
+                v -> showAnalyticsDetail("Film Analytics"));
 
         addButton(layout, "← BACK", v -> showGlobalMenu());
+        setScreen(createScroll(layout));
+    }
+
+    private void showAnalyticsDetail(String name) {
+        LinearLayout layout = createRoot();
+        layout.addView(createTitle(name));
+        layout.addView(createSubtitle("AVESON CENTRAL ANALYTICS"));
+        LinearLayout card = createCard();
+
+        if (name.equals("Artist Analytics")) {
+            addInfo(card, "Artist Profiles", "Artist profile tracking");
+            addInfo(card, "Submissions", "Submission status and review tracking");
+            addInfo(card, "Releases", "Release status and publishing tracking");
+            addInfo(card, "Performance", "Streams, listeners and audience data when connected");
+        } else if (name.equals("Music Analytics")) {
+            addInfo(card, "Music Catalog", "Catalog and track monitoring");
+            addInfo(card, "Albums & Releases", "Release status tracking");
+            addInfo(card, "Playlists", "Playlist management and activity");
+            addInfo(card, "Music Users", "User activity when connected");
+        } else if (name.equals("Distribution Analytics")) {
+            addInfo(card, "Platforms", "Platform connection and coverage tracking");
+            addInfo(card, "Releases", "Distribution release tracking");
+            addInfo(card, "Delivery", "Delivery status and error tracking");
+            addInfo(card, "Territories", "Territory coverage tracking");
+        } else if (name.equals("Studio Analytics")) {
+            addInfo(card, "Projects", "Project status tracking");
+            addInfo(card, "Production", "Recording, mixing and mastering workflow");
+            addInfo(card, "Sessions", "Session schedule and completion tracking");
+            addInfo(card, "Files", "Studio asset and master-file tracking");
+        } else if (name.equals("Magazine Analytics")) {
+            addInfo(card, "Articles", "Draft, scheduled and published article tracking");
+            addInfo(card, "Editorial", "Editorial review and approval workflow");
+            addInfo(card, "Media", "Media asset tracking");
+            addInfo(card, "Audience", "Readers and views when connected");
+        } else if (name.equals("Film Analytics")) {
+            addInfo(card, "Projects", "Film project tracking");
+            addInfo(card, "Videos", "Video publishing and processing tracking");
+            addInfo(card, "Productions", "Production workflow tracking");
+            addInfo(card, "Audience", "Views and watch-time data when connected");
+        }
+
+        addInfo(card, "Data Connection", "No live analytics source is connected in this screen yet");
+        layout.addView(card);
+        addButton(layout, "← BACK TO ANALYTICS", v -> showAnalytics());
         setScreen(createScroll(layout));
     }
 
@@ -147,29 +176,51 @@ public class CentralMenuContent {
         layout.addView(createSubtitle("Revenue, royalty and payment management"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Total Revenue", "$48,230");
-        addInfo(card, "Available", "$31,840");
-        addInfo(card, "Pending", "$16,390");
-        addInfo(card, "Artists With Earnings", "1,024");
+        addInfo(card, "Revenue Data", "Not connected");
+        addInfo(card, "Artist Earnings", "Will appear when royalty data is connected");
+        addInfo(card, "Payments", "Payment records are not connected to this screen yet");
         layout.addView(card);
 
-        addSectionButton(layout, "📄 Royalty Reports",
-                "Statements and financial reports",
-                v -> showMessage("Royalty Reports"));
-
-        addSectionButton(layout, "💵 Artist Earnings",
-                "Artist-level earnings",
-                v -> showMessage("Artist Earnings"));
-
-        addSectionButton(layout, "🌍 Platform Earnings",
-                "Revenue by platform",
-                v -> showMessage("Platform Earnings"));
-
-        addSectionButton(layout, "📅 Payment History",
-                "Previous royalty payments",
-                v -> showMessage("Payment History"));
+        addSectionButton(layout, "📄 Royalty Reports", "Statements and financial reports",
+                v -> showRoyaltyDetail("Royalty Reports"));
+        addSectionButton(layout, "💵 Artist Earnings", "Artist-level earnings",
+                v -> showRoyaltyDetail("Artist Earnings"));
+        addSectionButton(layout, "🌍 Platform Earnings", "Revenue by platform",
+                v -> showRoyaltyDetail("Platform Earnings"));
+        addSectionButton(layout, "📅 Payment History", "Previous royalty payments",
+                v -> showRoyaltyDetail("Payment History"));
 
         addButton(layout, "← BACK", v -> showGlobalMenu());
+        setScreen(createScroll(layout));
+    }
+
+    private void showRoyaltyDetail(String name) {
+        LinearLayout layout = createRoot();
+        layout.addView(createTitle(name));
+        layout.addView(createSubtitle("AVESON CENTRAL • ROYALTY CONTROL"));
+        LinearLayout card = createCard();
+
+        if (name.equals("Royalty Reports")) {
+            addInfo(card, "Statements", "Report section prepared");
+            addInfo(card, "Reporting Period", "To be selected when royalty data is connected");
+            addInfo(card, "Export", "Available after report data is connected");
+        } else if (name.equals("Artist Earnings")) {
+            addInfo(card, "Earnings by Artist", "Requires connected royalty records");
+            addInfo(card, "Available Balance", "Not available yet");
+            addInfo(card, "Pending Balance", "Not available yet");
+        } else if (name.equals("Platform Earnings")) {
+            addInfo(card, "Revenue by Platform", "Requires connected platform reports");
+            addInfo(card, "Reporting Currency", "To be configured");
+            addInfo(card, "Reconciliation", "Requires platform financial data");
+        } else if (name.equals("Payment History")) {
+            addInfo(card, "Payment Records", "Requires connected payment records");
+            addInfo(card, "Payment Status", "Not available yet");
+            addInfo(card, "Payout Statements", "Available after payment data is connected");
+        }
+
+        addInfo(card, "Connection Status", "No live royalty or payment source is connected in this screen yet");
+        layout.addView(card);
+        addButton(layout, "← BACK TO ROYALTY CONTROL", v -> showRoyaltyControl());
         setScreen(createScroll(layout));
     }
 
@@ -745,36 +796,29 @@ public class CentralMenuContent {
 
 
     private void showMessage(String name) {
-
-        LinearLayout layout = createRoot();
-
-        layout.addView(createTitle(name));
-        layout.addView(createSubtitle("AVESON CENTRAL"));
-
-        LinearLayout card = createCard();
-
-        addInfo(card, "Section", name);
-        addInfo(card, "Status", "AVAILABLE");
-        addInfo(card, "System", "AVESON CENTRAL");
-        addInfo(card, "Data", "Not connected");
-
-        layout.addView(card);
-
-        addButton(layout, "← BACK",
-                v -> showGlobalMenu());
-
-        setScreen(createScroll(layout));
+        if (name.contains("Analytics")) {
+            showAnalyticsDetail(name);
+        } else if (name.equals("Royalty Reports") || name.equals("Artist Earnings")
+                || name.equals("Platform Earnings") || name.equals("Payment History")) {
+            showRoyaltyDetail(name);
+        } else {
+            LinearLayout layout = createRoot();
+            layout.addView(createTitle(name));
+            layout.addView(createSubtitle("AVESON CENTRAL"));
+            LinearLayout card = createCard();
+            addInfo(card, "Section", name);
+            addInfo(card, "Purpose", "Central management section");
+            addInfo(card, "Data Status", "No live data source is connected to this section yet");
+            layout.addView(card);
+            addButton(layout, "← BACK", v -> showGlobalMenu());
+            setScreen(createScroll(layout));
+        }
     }
 
+    private void addInfoToLayout(LinearLayout layout, String label, String value) {
+        LinearLayout card = createCard();
+        addInfo(card, label, value);
+        layout.addView(card);
+    }
 
-
-private void addInfoToLayout(
-        LinearLayout layout,
-        String label,
-        String value
-) {
-    LinearLayout card = createCard();
-    addInfo(card, label, value);
-    layout.addView(card);
-}
 }
