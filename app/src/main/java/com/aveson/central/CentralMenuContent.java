@@ -97,31 +97,34 @@ public class CentralMenuContent {
 
     private void showGlobalMenu() { menuAction.run(); }
 
+    public void showPage(String page) {
+        if ("Analytics".equals(page)) showAnalytics();
+        else if ("Royalty Control".equals(page)) showRoyaltyControl();
+        else if ("Security".equals(page)) showSecurity();
+        else if ("Parameters".equals(page)) showParameters();
+        else if ("System Status".equals(page)) showSystemStatus();
+        else if ("AVESON Central Info".equals(page)) showAvesonCentralInfo();
+        else showMessage(page);
+    }
+
     private void showAnalytics() {
         LinearLayout layout = createRoot();
         layout.addView(createTitle("📊 ANALYTICS"));
         layout.addView(createSubtitle("Global AVESON statistics and insights"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Live Data", "Not connected");
-        addInfo(card, "Statistics", "Will appear when the relevant data sources are connected");
-        addInfo(card, "Reporting", "Analytics sections are organized below");
+        addInfo(card, "Data source", "Central analytics module");
+        addInfo(card, "Live metrics", "Not connected yet");
+        addInfo(card, "Accuracy", "No figures are shown until a data source is connected");
         layout.addView(card);
 
         layout.addView(createSubtitle("ROOM ANALYTICS"));
-        addSectionButton(layout, "🎵 Artist Analytics", "Artists, submissions and releases",
-                v -> showAnalyticsDetail("Artist Analytics"));
-        addSectionButton(layout, "🎼 Music Analytics", "Catalog, users and playlists",
-                v -> showAnalyticsDetail("Music Analytics"));
-        addSectionButton(layout, "🌍 Distribution Analytics", "Platforms and delivery",
-                v -> showAnalyticsDetail("Distribution Analytics"));
-        addSectionButton(layout, "🎙️ Studio Analytics", "Projects and production",
-                v -> showAnalyticsDetail("Studio Analytics"));
-        addSectionButton(layout, "📰 Magazine Analytics", "Editorial and audience",
-                v -> showAnalyticsDetail("Magazine Analytics"));
-        addSectionButton(layout, "🎬 Film Analytics", "Film and video performance",
-                v -> showAnalyticsDetail("Film Analytics"));
-
+        addSectionButton(layout, "🎵 Artist Analytics", "Artists, submissions and releases", v -> showAnalyticsDetail("Artist Analytics"));
+        addSectionButton(layout, "🎼 Music Analytics", "Catalog, users and playlists", v -> showAnalyticsDetail("Music Analytics"));
+        addSectionButton(layout, "🌍 Distribution Analytics", "Platforms and delivery", v -> showAnalyticsDetail("Distribution Analytics"));
+        addSectionButton(layout, "🎙️ Studio Analytics", "Projects and production", v -> showAnalyticsDetail("Studio Analytics"));
+        addSectionButton(layout, "📰 Magazine Analytics", "Editorial and audience", v -> showAnalyticsDetail("Magazine Analytics"));
+        addSectionButton(layout, "🎬 Film Analytics", "Film and video performance", v -> showAnalyticsDetail("Film Analytics"));
         addButton(layout, "← BACK", v -> showGlobalMenu());
         setScreen(createScroll(layout));
     }
@@ -131,40 +134,37 @@ public class CentralMenuContent {
         layout.addView(createTitle(name));
         layout.addView(createSubtitle("AVESON CENTRAL ANALYTICS"));
         LinearLayout card = createCard();
-
-        if (name.equals("Artist Analytics")) {
-            addInfo(card, "Artist Profiles", "Artist profile tracking");
-            addInfo(card, "Submissions", "Submission status and review tracking");
-            addInfo(card, "Releases", "Release status and publishing tracking");
-            addInfo(card, "Performance", "Streams, listeners and audience data when connected");
-        } else if (name.equals("Music Analytics")) {
-            addInfo(card, "Music Catalog", "Catalog and track monitoring");
-            addInfo(card, "Albums & Releases", "Release status tracking");
+        if ("Artist Analytics".equals(name)) {
+            addInfo(card, "Artist profiles", "Artist profile and status tracking");
+            addInfo(card, "Submissions", "Submission review tracking");
+            addInfo(card, "Releases", "Release review and publishing tracking");
+            addInfo(card, "Performance", "Artist metrics become available after data connection");
+        } else if ("Music Analytics".equals(name)) {
+            addInfo(card, "Music catalog", "Catalog inventory and metadata tracking");
+            addInfo(card, "Albums & releases", "Release lifecycle tracking");
             addInfo(card, "Playlists", "Playlist management and activity");
-            addInfo(card, "Music Users", "User activity when connected");
-        } else if (name.equals("Distribution Analytics")) {
-            addInfo(card, "Platforms", "Platform connection and coverage tracking");
+            addInfo(card, "Music users", "User activity metrics require a connected data source");
+        } else if ("Distribution Analytics".equals(name)) {
+            addInfo(card, "Platforms", "Platform connection and availability tracking");
             addInfo(card, "Releases", "Distribution release tracking");
-            addInfo(card, "Delivery", "Delivery status and error tracking");
-            addInfo(card, "Territories", "Territory coverage tracking");
-        } else if (name.equals("Studio Analytics")) {
-            addInfo(card, "Projects", "Project status tracking");
-            addInfo(card, "Production", "Recording, mixing and mastering workflow");
-            addInfo(card, "Sessions", "Session schedule and completion tracking");
-            addInfo(card, "Files", "Studio asset and master-file tracking");
-        } else if (name.equals("Magazine Analytics")) {
-            addInfo(card, "Articles", "Draft, scheduled and published article tracking");
-            addInfo(card, "Editorial", "Editorial review and approval workflow");
-            addInfo(card, "Media", "Media asset tracking");
-            addInfo(card, "Audience", "Readers and views when connected");
-        } else if (name.equals("Film Analytics")) {
+            addInfo(card, "Delivery", "Delivery status and retry monitoring");
+            addInfo(card, "Reports", "Distribution reports require delivery data");
+        } else if ("Studio Analytics".equals(name)) {
+            addInfo(card, "Projects", "Studio project tracking");
+            addInfo(card, "Production", "Audio production workflow tracking");
+            addInfo(card, "Sessions", "Recording session tracking");
+            addInfo(card, "Files", "Studio asset tracking");
+        } else if ("Magazine Analytics".equals(name)) {
+            addInfo(card, "Articles", "Article inventory and publication status");
+            addInfo(card, "Editorial", "Editorial workflow tracking");
+            addInfo(card, "Media", "Magazine media asset tracking");
+            addInfo(card, "Writers", "Writer and contributor tracking");
+        } else {
             addInfo(card, "Projects", "Film project tracking");
-            addInfo(card, "Videos", "Video publishing and processing tracking");
+            addInfo(card, "Videos", "Video inventory and publishing status");
             addInfo(card, "Productions", "Production workflow tracking");
-            addInfo(card, "Audience", "Views and watch-time data when connected");
+            addInfo(card, "Film library", "Film content library tracking");
         }
-
-        addInfo(card, "Data Connection", "No live analytics source is connected in this screen yet");
         layout.addView(card);
         addButton(layout, "← BACK TO ANALYTICS", v -> showAnalytics());
         setScreen(createScroll(layout));
@@ -173,23 +173,16 @@ public class CentralMenuContent {
     private void showRoyaltyControl() {
         LinearLayout layout = createRoot();
         layout.addView(createTitle("💰 ROYALTY CONTROL"));
-        layout.addView(createSubtitle("Revenue, royalty and payment management"));
-
+        layout.addView(createSubtitle("Revenue, royalties and payment management"));
         LinearLayout card = createCard();
-        addInfo(card, "Revenue Data", "Not connected");
-        addInfo(card, "Artist Earnings", "Will appear when royalty data is connected");
-        addInfo(card, "Payments", "Payment records are not connected to this screen yet");
+        addInfo(card, "Financial data", "Not connected yet");
+        addInfo(card, "Revenue totals", "Will appear when royalty data is connected");
+        addInfo(card, "Payment status", "No payment records are being reported here yet");
         layout.addView(card);
-
-        addSectionButton(layout, "📄 Royalty Reports", "Statements and financial reports",
-                v -> showRoyaltyDetail("Royalty Reports"));
-        addSectionButton(layout, "💵 Artist Earnings", "Artist-level earnings",
-                v -> showRoyaltyDetail("Artist Earnings"));
-        addSectionButton(layout, "🌍 Platform Earnings", "Revenue by platform",
-                v -> showRoyaltyDetail("Platform Earnings"));
-        addSectionButton(layout, "📅 Payment History", "Previous royalty payments",
-                v -> showRoyaltyDetail("Payment History"));
-
+        addSectionButton(layout, "📄 Royalty Reports", "Statements and financial reports", v -> showRoyaltyDetail("Royalty Reports"));
+        addSectionButton(layout, "💵 Artist Earnings", "Artist-level earnings", v -> showRoyaltyDetail("Artist Earnings"));
+        addSectionButton(layout, "🌍 Platform Earnings", "Revenue by platform", v -> showRoyaltyDetail("Platform Earnings"));
+        addSectionButton(layout, "📅 Payment History", "Previous royalty payments", v -> showRoyaltyDetail("Payment History"));
         addButton(layout, "← BACK", v -> showGlobalMenu());
         setScreen(createScroll(layout));
     }
@@ -197,28 +190,25 @@ public class CentralMenuContent {
     private void showRoyaltyDetail(String name) {
         LinearLayout layout = createRoot();
         layout.addView(createTitle(name));
-        layout.addView(createSubtitle("AVESON CENTRAL • ROYALTY CONTROL"));
+        layout.addView(createSubtitle("AVESON CENTRAL ROYALTY CONTROL"));
         LinearLayout card = createCard();
-
-        if (name.equals("Royalty Reports")) {
-            addInfo(card, "Statements", "Report section prepared");
-            addInfo(card, "Reporting Period", "To be selected when royalty data is connected");
-            addInfo(card, "Export", "Available after report data is connected");
-        } else if (name.equals("Artist Earnings")) {
-            addInfo(card, "Earnings by Artist", "Requires connected royalty records");
-            addInfo(card, "Available Balance", "Not available yet");
-            addInfo(card, "Pending Balance", "Not available yet");
-        } else if (name.equals("Platform Earnings")) {
-            addInfo(card, "Revenue by Platform", "Requires connected platform reports");
-            addInfo(card, "Reporting Currency", "To be configured");
-            addInfo(card, "Reconciliation", "Requires platform financial data");
-        } else if (name.equals("Payment History")) {
-            addInfo(card, "Payment Records", "Requires connected payment records");
-            addInfo(card, "Payment Status", "Not available yet");
-            addInfo(card, "Payout Statements", "Available after payment data is connected");
+        if ("Royalty Reports".equals(name)) {
+            addInfo(card, "Reports", "Report generation and statements");
+            addInfo(card, "Source", "Requires connected royalty records");
+            addInfo(card, "Status", "Awaiting data connection");
+        } else if ("Artist Earnings".equals(name)) {
+            addInfo(card, "Earnings by artist", "Artist earnings are not available until royalty records are connected");
+            addInfo(card, "Statements", "Artist statements can be prepared from verified records");
+            addInfo(card, "Status", "Awaiting data connection");
+        } else if ("Platform Earnings".equals(name)) {
+            addInfo(card, "Platform breakdown", "Revenue by platform requires distribution reports");
+            addInfo(card, "Reconciliation", "Compare reports after platform data is connected");
+            addInfo(card, "Status", "Awaiting data connection");
+        } else {
+            addInfo(card, "Payment records", "Payment history will display verified transactions");
+            addInfo(card, "Payment status", "No live payment feed is connected");
+            addInfo(card, "Status", "Awaiting data connection");
         }
-
-        addInfo(card, "Connection Status", "No live royalty or payment source is connected in this screen yet");
         layout.addView(card);
         addButton(layout, "← BACK TO ROYALTY CONTROL", v -> showRoyaltyControl());
         setScreen(createScroll(layout));
@@ -323,10 +313,10 @@ public class CentralMenuContent {
         layout.addView(createTitle("📱 AUTHORIZED DEVICES"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Device Management", "Enabled");
-        addInfo(card, "Current Device", "Authorized");
-        addInfo(card, "Device Verification", "Enabled");
-        addInfo(card, "Unknown Devices", "Blocked");
+        addInfo(card, "Device Management", "Not connected to an authentication service");
+        addInfo(card, "Current Device", "Authorization has not been verified");
+        addInfo(card, "Device Verification", "Not implemented yet");
+        addInfo(card, "Unknown Devices", "Blocking is not implemented yet");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -338,10 +328,10 @@ public class CentralMenuContent {
         layout.addView(createTitle("📋 LOGIN ACTIVITY"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Last Login", "Central administrator");
-        addInfo(card, "Activity Status", "MONITORED");
-        addInfo(card, "Failed Attempts", "0");
-        addInfo(card, "Audit", "Enabled");
+        addInfo(card, "Last Login", "No login history connected");
+        addInfo(card, "Activity Status", "Monitoring service not connected");
+        addInfo(card, "Failed Attempts", "No records available");
+        addInfo(card, "Audit", "Audit logging not connected");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -353,11 +343,11 @@ public class CentralMenuContent {
         layout.addView(createTitle("🛡️ SECURITY PROTECTION"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Access Protection", "ACTIVE");
-        addInfo(card, "Session Protection", "ACTIVE");
-        addInfo(card, "Device Protection", "ACTIVE");
-        addInfo(card, "API Protection", "ACTIVE");
-        addInfo(card, "Audit Monitoring", "ACTIVE");
+        addInfo(card, "Access Protection", "Not implemented / not connected");
+        addInfo(card, "Session Protection", "Not implemented / not connected");
+        addInfo(card, "Device Protection", "Not implemented / not connected");
+        addInfo(card, "API Protection", "No API security service connected");
+        addInfo(card, "Audit Monitoring", "Audit service not connected");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -369,10 +359,10 @@ public class CentralMenuContent {
         layout.addView(createTitle("⚠️ SECURITY EVENTS"));
 
         LinearLayout card = createCard();
-        addInfo(card, "System Events", "MONITORED");
-        addInfo(card, "Access Events", "MONITORED");
-        addInfo(card, "Permission Changes", "MONITORED");
-        addInfo(card, "Suspicious Activity", "0");
+        addInfo(card, "System Events", "Event source not connected");
+        addInfo(card, "Access Events", "Event source not connected");
+        addInfo(card, "Permission Changes", "Event source not connected");
+        addInfo(card, "Suspicious Activity", "No event data available");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -384,10 +374,10 @@ public class CentralMenuContent {
         layout.addView(createTitle("🔑 PASSWORD & AUTHENTICATION"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Authentication", "ACTIVE");
-        addInfo(card, "Password Protection", "ACTIVE");
-        addInfo(card, "Session Verification", "ACTIVE");
-        addInfo(card, "Multi-Factor Authentication", "READY");
+        addInfo(card, "Authentication", "Authentication service not connected");
+        addInfo(card, "Password Protection", "Not implemented yet");
+        addInfo(card, "Session Verification", "Not implemented yet");
+        addInfo(card, "Multi-Factor Authentication", "Not implemented yet");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -400,9 +390,9 @@ public class CentralMenuContent {
 
         LinearLayout card = createCard();
         addInfo(card, "HTTPS", "Required");
-        addInfo(card, "API Authentication", "Protected");
-        addInfo(card, "API Access", "Controlled");
-        addInfo(card, "Network Monitoring", "ACTIVE");
+        addInfo(card, "API Authentication", "Not configured");
+        addInfo(card, "API Access", "No API gateway connected");
+        addInfo(card, "Network Monitoring", "Monitoring service not connected");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -414,10 +404,10 @@ public class CentralMenuContent {
         layout.addView(createTitle("📜 SECURITY LOGS"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Audit Logging", "ACTIVE");
-        addInfo(card, "Access Logs", "ACTIVE");
-        addInfo(card, "Security Logs", "ACTIVE");
-        addInfo(card, "Retention", "Configured");
+        addInfo(card, "Audit Logging", "Logging service not connected");
+        addInfo(card, "Access Logs", "No access log source connected");
+        addInfo(card, "Security Logs", "No security log source connected");
+        addInfo(card, "Retention", "Not configured yet");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showSecurity());
@@ -460,7 +450,7 @@ public class CentralMenuContent {
         LinearLayout card = createCard();
         addInfo(card, "Primary Language", "English");
         addInfo(card, "Available", "English / Uzbek / Russian");
-        addInfo(card, "Language System", "READY");
+        addInfo(card, "Language System", "Language selection is displayed; full interface translation is not connected yet");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showParameters());
@@ -758,13 +748,13 @@ public class CentralMenuContent {
         layout.addView(createSubtitle("AVESON Central system overview"));
 
         LinearLayout card = createCard();
-        addInfo(card, "Central System", "ONLINE");
-        addInfo(card, "Artist Control", "READY");
-        addInfo(card, "Music Control", "READY");
-        addInfo(card, "Distribution Control", "READY");
-        addInfo(card, "Studio Control", "READY");
-        addInfo(card, "Magazine Control", "READY");
-        addInfo(card, "AVESON Films", "READY");
+        addInfo(card, "Central Interface", "Loaded");
+        addInfo(card, "Artist Control", "Module connection not verified");
+        addInfo(card, "Music Control", "Module connection not verified");
+        addInfo(card, "Distribution Control", "Module connection not verified");
+        addInfo(card, "Studio Control", "Module connection not verified");
+        addInfo(card, "Magazine Control", "Module connection not verified");
+        addInfo(card, "AVESON Films", "Module connection not verified");
         layout.addView(card);
 
         addButton(layout, "← BACK", v -> showGlobalMenu());
@@ -796,24 +786,27 @@ public class CentralMenuContent {
 
 
     private void showMessage(String name) {
-        if (name.contains("Analytics")) {
-            showAnalyticsDetail(name);
-        } else if (name.equals("Royalty Reports") || name.equals("Artist Earnings")
-                || name.equals("Platform Earnings") || name.equals("Payment History")) {
-            showRoyaltyDetail(name);
-        } else {
-            LinearLayout layout = createRoot();
-            layout.addView(createTitle(name));
-            layout.addView(createSubtitle("AVESON CENTRAL"));
-            LinearLayout card = createCard();
-            addInfo(card, "Section", name);
-            addInfo(card, "Purpose", "Central management section");
-            addInfo(card, "Data Status", "No live data source is connected to this section yet");
-            layout.addView(card);
-            addButton(layout, "← BACK", v -> showGlobalMenu());
-            setScreen(createScroll(layout));
-        }
+
+        LinearLayout layout = createRoot();
+
+        layout.addView(createTitle(name));
+        layout.addView(createSubtitle("AVESON CENTRAL"));
+
+        LinearLayout card = createCard();
+
+        addInfo(card, "Section", name);
+        addInfo(card, "Status", "Interface page available; backend status not verified");
+        addInfo(card, "System", "AVESON CENTRAL");
+        addInfo(card, "Data", "Not connected");
+
+        layout.addView(card);
+
+        addButton(layout, "← BACK",
+                v -> showGlobalMenu());
+
+        setScreen(createScroll(layout));
     }
+
 
     private void addInfoToLayout(LinearLayout layout, String label, String value) {
         LinearLayout card = createCard();
@@ -821,4 +814,5 @@ public class CentralMenuContent {
         layout.addView(card);
     }
 
-                         }
+
+}
