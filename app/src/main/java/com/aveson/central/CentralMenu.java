@@ -851,8 +851,16 @@ private void showArtistAnalytics() {
     addInfo(card, "Release Status", "Release workflow tracking");
     addInfo(card, "Approved Releases", "Requires connected Artist Control data");
     addInfo(card, "Rejected Releases", "Requires connected Artist Control data");
-    addInfo(card, "Data Connection", "Artist Control data source not connected");
+    addInfo(card, "Data Connection", "Artist Control management module available");
     layout.addView(card);
+
+    addButton(layout, "🎵 OPEN AVESON ARTIST CONTROL", v -> {
+        AvesonArtistControl artistControl = new AvesonArtistControl(
+                activity,
+                () -> showAnalytics()
+        );
+        artistControl.show();
+    });
 
     addButton(layout, "← BACK", v -> showAnalytics());
     setScreen(createScroll(layout));
