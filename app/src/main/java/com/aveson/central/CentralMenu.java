@@ -207,7 +207,7 @@ private void showAnalytics() {
 
     addSectionButton(layout, "🎵 Artist Analytics",  
             "Artists, submissions and releases",  
-            v -> showMessage("Artist Analytics"));  
+            v -> showArtistAnalytics());  
 
     addSectionButton(layout, "🎼 Music Analytics",  
             "Catalog, users and playlists",  
@@ -834,6 +834,29 @@ private void showAvesonCentralInfo() {
     addButton(layout, "← BACK", v -> showGlobalMenu());  
     setScreen(createScroll(layout));  
 }  
+
+// =========================================================
+// ARTIST ANALYTICS
+// =========================================================
+
+private void showArtistAnalytics() {
+    LinearLayout layout = createRoot();
+
+    layout.addView(createTitle("🎵 ARTIST ANALYTICS"));
+    layout.addView(createSubtitle("AVESON CENTRAL · Artist Control overview"));
+
+    LinearLayout card = createCard();
+    addInfo(card, "Artist Profiles", "Artist profile tracking");
+    addInfo(card, "Submissions", "Submitted tracks and review status");
+    addInfo(card, "Release Status", "Release workflow tracking");
+    addInfo(card, "Approved Releases", "Requires connected Artist Control data");
+    addInfo(card, "Rejected Releases", "Requires connected Artist Control data");
+    addInfo(card, "Data Connection", "Artist Control data source not connected");
+    layout.addView(card);
+
+    addButton(layout, "← BACK", v -> showAnalytics());
+    setScreen(createScroll(layout));
+}
 
 // =========================================================  
 // ROOMS  
