@@ -16,7 +16,6 @@ public class CentralMenu {
     private final Activity activity;
     private final Runnable homeAction;
 
-    // Existing AVESON CENTRAL colors
     private static final int DARK =
             Color.rgb(8, 8, 18);
 
@@ -66,41 +65,12 @@ public class CentralMenu {
                 createSubtitle("AVESON CENTRAL CORE")
         );
 
-        addMenuItem(
-                layout,
-                "Analytics",
-                "Analytics"
-        );
-
-        addMenuItem(
-                layout,
-                "Royalty Control",
-                "Royalty Control"
-        );
-
-        addMenuItem(
-                layout,
-                "Security",
-                "Security"
-        );
-
-        addMenuItem(
-                layout,
-                "Parameters",
-                "Parameters"
-        );
-
-        addMenuItem(
-                layout,
-                "System Status",
-                "System Status"
-        );
-
-        addMenuItem(
-                layout,
-                "AVESON Central Info",
-                "AVESON Central Info"
-        );
+        addMenuItem(layout, "Analytics");
+        addMenuItem(layout, "Royalty Control");
+        addMenuItem(layout, "Security");
+        addMenuItem(layout, "Parameters");
+        addMenuItem(layout, "System Status");
+        addMenuItem(layout, "AVESON Central Info");
 
         TextView footer = new TextView(activity);
 
@@ -124,27 +94,32 @@ public class CentralMenu {
         ScrollView scroll = new ScrollView(activity);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(DARK);
+        scroll.setClipToPadding(false);
+        scroll.setPadding(0, 0, 0, dp(12));
         scroll.addView(layout);
 
         activity.setContentView(scroll);
     }
 
     // ============================================================
-    // MENU NAVIGATION
+    // MENU ITEMS
     // ============================================================
 
     private void addMenuItem(
             LinearLayout layout,
-            String title,
             String page
     ) {
         addButton(
                 layout,
-                title,
+                page,
                 BLUE,
                 v -> openPage(page)
         );
     }
+
+    // ============================================================
+    // PAGE NAVIGATION
+    // ============================================================
 
     private void openPage(String page) {
 
@@ -161,11 +136,13 @@ public class CentralMenu {
 
         if (homeAction != null) {
             homeAction.run();
+        } else {
+            activity.finish();
         }
     }
 
     // ============================================================
-    // ROOT LAYOUT
+    // ROOT
     // ============================================================
 
     private LinearLayout createRoot() {
