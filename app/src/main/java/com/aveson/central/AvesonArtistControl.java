@@ -223,7 +223,7 @@ public class AvesonArtistControl {
     private void showDashboard() {
         LinearLayout layout = createRoot();
 
-        layout.addView(title("🎵 AVESON"));
+        layout.addView(title("рџЋµ AVESON"));
         layout.addView(title("ARTIST CONTROL"));
         layout.addView(subtitle(
                 "Artist & Release Management"
@@ -267,56 +267,56 @@ public class AvesonArtistControl {
 
         addSection(
                 layout,
-                "👥 Artist Management",
+                "рџ‘Ґ Artist Management",
                 "Manage registered artists",
                 v -> showArtistManagement()
         );
 
         addSection(
                 layout,
-                "🎤 Artist Profiles",
+                "рџЋ¤ Artist Profiles",
                 "View artist information",
                 v -> showArtistProfiles()
         );
 
         addSection(
                 layout,
-                "🎵 Music Submissions",
+                "рџЋµ Music Submissions",
                 "View submitted releases",
                 v -> showSubmissions()
         );
 
         addSection(
                 layout,
-                "🔍 Release Review",
+                "рџ”Ќ Release Review",
                 "Review pending releases",
                 v -> showReleaseReview()
         );
 
         addSection(
                 layout,
-                "✅ Approved Releases",
+                "вњ… Approved Releases",
                 "Approved music releases",
                 v -> showReleaseList("APPROVED")
         );
 
         addSection(
                 layout,
-                "❌ Rejected Releases",
+                "вќЊ Rejected Releases",
                 "Rejected releases and reasons",
                 v -> showReleaseList("REJECTED")
         );
 
         addSection(
                 layout,
-                "📊 Artist Analytics",
+                "рџ“Љ Artist Analytics",
                 "Artist and release statistics",
                 v -> showAnalytics()
         );
 
         addSection(
                 layout,
-                "⚙️ Settings",
+                "вљ™пёЏ Settings",
                 "Control information",
                 v -> showSettings()
         );
@@ -379,7 +379,7 @@ public class AvesonArtistControl {
 
         addButton(
                 layout,
-                "← BACK",
+                "в†ђ BACK",
                 v -> showDashboard()
         );
 
@@ -495,7 +495,7 @@ public class AvesonArtistControl {
             );
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
@@ -542,7 +542,7 @@ public class AvesonArtistControl {
 
         addButton(
                 layout,
-                "← BACK",
+                "в†ђ BACK",
                 v -> showArtistManagement()
         );
 
@@ -589,7 +589,7 @@ public class AvesonArtistControl {
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
@@ -713,7 +713,7 @@ public class AvesonArtistControl {
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
@@ -801,7 +801,7 @@ public class AvesonArtistControl {
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
@@ -862,7 +862,7 @@ public class AvesonArtistControl {
 
         layout.addView(card);
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
@@ -910,8 +910,8 @@ public class AvesonArtistControl {
 
         layout.addView(card);
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "в†ђ BACK", v -> showDashboard());
 
         showScreen(layout);
     }
-          }
+}
