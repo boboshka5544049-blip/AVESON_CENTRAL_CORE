@@ -68,14 +68,11 @@ public class MainActivity extends Activity {
         );
 
         addRoom(
-                layout,
-                "AVESON ARTIST CONTROL",
-                "Artist management & submissions",
-                v -> showRoom(
-                        "AVESON ARTIST CONTROL",
-                        "Artist management & submissions"
-                )
-        );
+    layout,
+    "AVESON ARTIST CONTROL",
+    "Artist management & submissions",
+    v -> new AvesonArtistControl(this).show()
+);
 
         addRoom(
                 layout,
