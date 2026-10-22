@@ -855,11 +855,10 @@ private void showArtistAnalytics() {
     layout.addView(card);
 
     addButton(layout, "🎵 OPEN AVESON ARTIST CONTROL", v -> {
-        AvesonArtistControl artistControl = new AvesonArtistControl(
-                activity,
-                () -> showAnalytics()
-        );
-        artistControl.show();
+        AvesonArtistControl artistControl =
+    new AvesonArtistControl(activity);
+
+artistControl.show();
     });
 
     addButton(layout, "← BACK", v -> showAnalytics());
