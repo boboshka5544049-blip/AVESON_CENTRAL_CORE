@@ -854,13 +854,6 @@ private void showArtistAnalytics() {
     addInfo(card, "Data Connection", "Artist Control management module available");
     layout.addView(card);
 
-    addButton(layout, "🎵 OPEN AVESON ARTIST CONTROL", v -> {
-        AvesonArtistControl artistControl =
-    new AvesonArtistControl(activity);
-
-artistControl.show();
-    });
-
     addButton(layout, "← BACK", v -> showAnalytics());
     setScreen(createScroll(layout));
 }
