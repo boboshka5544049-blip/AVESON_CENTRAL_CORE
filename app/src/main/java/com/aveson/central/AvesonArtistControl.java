@@ -858,39 +858,53 @@ public class AvesonArtistControl {
 
     private void showReleaseList(String status) {
         LinearLayout layout = createRoot();
+        boolean approved = "APPROVED".equals(status);
 
-        layout.addView(
-                title(
-                        status.equals("APPROVED")
-                                ? "APPROVED RELEASES"
-                                : "REJECTED RELEASES"
-                )
-        );
+        layout.addView(title(
+                approved ? "APPROVED RELEASES" : "REJECTED RELEASES"
+        ));
+        layout.addView(subtitle(
+                approved
+                        ? "Releases approved by Artist Control"
+                        : "Rejected releases and review reasons"
+        ));
 
+        int matchingReleases = 0;
         for (Release release : releases) {
-            if (!release.status.equals(status)) {
+            if (!status.equals(release.status)) {
                 continue;
             }
 
+            matchingReleases++;
             LinearLayout card = createCard();
-
             addInfo(card, "Release", release.title);
             addInfo(card, "Artist", release.artist);
             addInfo(card, "Status", release.status);
 
-            if (status.equals("REJECTED")) {
-                addInfo(
-                        card,
-                        "Rejection Reason",
-                        release.reason
-                );
+            if (!approved) {
+                String reason = release.reason == null
+                        || release.reason.trim().isEmpty()
+                        ? "No reason provided"
+                        : release.reason;
+                addInfo(card, "Rejection Reason", reason);
             }
 
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        if (matchingReleases == 0) {
+            LinearLayout emptyCard = createCard();
+            addInfo(
+                    emptyCard,
+                    approved ? "Approved Releases" : "Rejected Releases",
+                    approved
+                            ? "No approved releases yet. Approved submissions will appear here."
+                            : "No rejected releases yet. Rejected submissions and their reasons will appear here."
+            );
+            layout.addView(emptyCard);
+        }
 
+        addButton(layout, "← BACK", v -> showDashboard());
         showScreen(layout);
     }
 
@@ -981,7 +995,7 @@ public class AvesonArtistControl {
         addInfo(
                 card,
                 "Data Storage",
-                "Temporary in-memory storage"
+                "Saved locally on this device (SharedPreferences)"
         );
 
         addInfo(
