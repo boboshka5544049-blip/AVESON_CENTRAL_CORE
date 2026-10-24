@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+    private AvesonArtistControl artistControl;
+
     private static final int DARK = Color.rgb(8, 8, 18);
     private static final int CARD = Color.rgb(16, 14, 32);
     private static final int CARD_2 = Color.rgb(22, 18, 42);
@@ -71,7 +73,10 @@ public class MainActivity extends Activity {
     layout,
     "AVESON ARTIST CONTROL",
     "Artist management & submissions",
-    v -> new AvesonArtistControl(this).show()
+    v -> {
+        artistControl = new AvesonArtistControl(this);
+        artistControl.show();
+    }
 );
 
         addRoom(
@@ -1231,6 +1236,14 @@ public class MainActivity extends Activity {
     // ============================================================
     // BACK
     // ============================================================
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (artistControl != null) {
+            artistControl.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
     @Override
     public void onBackPressed() {
