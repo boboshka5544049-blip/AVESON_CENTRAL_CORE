@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
+import android.content.Intent;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,6 +39,10 @@ public class AvesonArtistControl {
     private final ArrayList<Release> releases = new ArrayList<>();
 
     private final SharedPreferences preferences;
+    private static AvesonArtistControl activeInstance;
+    private static final int AUDIO_PICK_REQUEST = 4817;
+    private Uri selectedAudioUri;
+    private TextView selectedAudioText;
 
     public AvesonArtistControl(Activity activity) {
         this.activity = activity;
@@ -75,6 +81,7 @@ public class AvesonArtistControl {
                 );
                 release.status = item.optString("status", "PENDING");
                 release.reason = item.optString("reason", "");
+                release.audioUri = item.optString("audioUri", "");
                 releases.add(release);
             }
         } catch (Exception e) {
@@ -104,6 +111,7 @@ public class AvesonArtistControl {
                 item.put("artist", release.artist);
                 item.put("status", release.status);
                 item.put("reason", release.reason);
+                item.put("audioUri", release.audioUri);
                 releaseArray.put(item);
             }
 
@@ -293,6 +301,7 @@ public class AvesonArtistControl {
             this.artist = artist;
             this.status = "PENDING";
             this.reason = "";
+            this.audioUri = "";
         }
     }
 
@@ -707,45 +716,93 @@ public class AvesonArtistControl {
     }
 
     private void showAddReleaseDialog(String artistName) {
+        selectedAudioUri = null;
+
+        LinearLayout form = new LinearLayout(activity);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(dp(20), dp(8), dp(20), dp(8));
+
         EditText input = new EditText(activity);
         input.setHint("Release or song title");
         input.setSingleLine(true);
+        form.addView(input);
+
+        Button chooseAudio = createButton("CHOOSE AUDIO FILE");
+        form.addView(chooseAudio, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(52)));
+
+        selectedAudioText = new TextView(activity);
+        selectedAudioText.setText("No audio file selected");
+        selectedAudioText.setTextColor(GRAY);
+        selectedAudioText.setTextSize(13);
+        selectedAudioText.setPadding(dp(4), dp(10), dp(4), dp(6));
+        form.addView(selectedAudioText);
+        chooseAudio.setOnClickListener(v -> openAudioPicker());
 
         new AlertDialog.Builder(activity)
                 .setTitle("New Music Submission")
                 .setMessage("Artist: " + artistName)
-                .setView(input)
+                .setView(form)
                 .setNegativeButton("CANCEL", null)
                 .setPositiveButton("SUBMIT", (dialog, which) -> {
-                    String releaseTitle = input.getText()
-                            .toString().trim();
-
+                    String releaseTitle = input.getText().toString().trim();
                     if (releaseTitle.isEmpty()) {
-                        Toast.makeText(
-                                activity,
-                                "Release title is required",
-                                Toast.LENGTH_SHORT
-                        ).show();
+                        Toast.makeText(activity, "Release title is required",
+                                Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    releases.add(
-                            new Release(releaseTitle, artistName)
-                    );
+                    Release release = new Release(releaseTitle, artistName);
+                    if (selectedAudioUri != null) {
+                        release.audioUri = selectedAudioUri.toString();
+                    }
+                    releases.add(release);
                     saveData();
-
-                    Toast.makeText(
-                            activity,
-                            "Submission added for review",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Toast.makeText(activity,
+                            selectedAudioUri == null
+                                    ? "Submission saved (no audio attached)"
+                                    : "Submission saved with audio",
+                            Toast.LENGTH_SHORT).show();
                     showSubmissions();
                 })
                 .show();
     }
 
-    // =========================================
+    private void openAudioPicker() {
+        try {
+            activeInstance = this;
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("audio/*");
+            activity.startActivityForResult(intent, AUDIO_PICK_REQUEST);
+        } catch (Exception e) {
+            Toast.makeText(activity, "Could not open audio file picker.",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static boolean handleActivityResult(int requestCode, int resultCode,
+                                               Intent data) {
+        if (requestCode != AUDIO_PICK_REQUEST || activeInstance == null) {
+            return false;
+        }
+        if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            AvesonArtistControl control = activeInstance;
+            control.selectedAudioUri = data.getData();
+            try {
+                control.activity.getContentResolver().takePersistableUriPermission(
+                        control.selectedAudioUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {
+                // Provider may not support persistent URI permissions.
+            }
+            if (control.selectedAudioText != null) {
+                String name = control.selectedAudioUri.getLastPathSegment();
+                control.selectedAudioText.setText("Selected: " +
+                        (name == null ? "Audio file attached" : name));
+            }
+        }
+        return true;
+    }
+
     // RELEASE REVIEW
     // =========================================
 
@@ -858,53 +915,41 @@ public class AvesonArtistControl {
 
     private void showReleaseList(String status) {
         LinearLayout layout = createRoot();
-        boolean approved = "APPROVED".equals(status);
 
-        layout.addView(title(
-                approved ? "APPROVED RELEASES" : "REJECTED RELEASES"
-        ));
-        layout.addView(subtitle(
-                approved
-                        ? "Releases approved by Artist Control"
-                        : "Rejected releases and review reasons"
-        ));
+        layout.addView(
+                title(
+                        status.equals("APPROVED")
+                                ? "APPROVED RELEASES"
+                                : "REJECTED RELEASES"
+                )
+        );
 
-        int matchingReleases = 0;
         for (Release release : releases) {
-            if (!status.equals(release.status)) {
+            if (!release.status.equals(status)) {
                 continue;
             }
 
-            matchingReleases++;
             LinearLayout card = createCard();
+
             addInfo(card, "Release", release.title);
             addInfo(card, "Artist", release.artist);
             addInfo(card, "Status", release.status);
+            addInfo(card, "Audio File", release.audioUri == null || release.audioUri.isEmpty()
+                    ? "Not attached" : "Attached");
 
-            if (!approved) {
-                String reason = release.reason == null
-                        || release.reason.trim().isEmpty()
-                        ? "No reason provided"
-                        : release.reason;
-                addInfo(card, "Rejection Reason", reason);
+            if (status.equals("REJECTED")) {
+                addInfo(
+                        card,
+                        "Rejection Reason",
+                        release.reason
+                );
             }
 
             layout.addView(card);
         }
 
-        if (matchingReleases == 0) {
-            LinearLayout emptyCard = createCard();
-            addInfo(
-                    emptyCard,
-                    approved ? "Approved Releases" : "Rejected Releases",
-                    approved
-                            ? "No approved releases yet. Approved submissions will appear here."
-                            : "No rejected releases yet. Rejected submissions and their reasons will appear here."
-            );
-            layout.addView(emptyCard);
-        }
-
         addButton(layout, "← BACK", v -> showDashboard());
+
         showScreen(layout);
     }
 
