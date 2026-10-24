@@ -145,7 +145,7 @@ public class AvesonArtistControl {
     private LinearLayout createRoot() {
         LinearLayout layout = new LinearLayout(activity);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(dp(18), dp(24), dp(18), dp(32));
+        layout.setPadding(dp(18), dp(24), dp(18), dp(64));
         layout.setBackgroundColor(BACKGROUND);
         return layout;
     }
