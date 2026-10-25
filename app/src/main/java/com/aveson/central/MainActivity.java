@@ -992,11 +992,11 @@ public class MainActivity extends Activity {
         // Compact MENU button aligned to the upper-right.
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
-                        dp(116),
-                        dp(44)
+                        dp(100),
+                        dp(40)
                 );
         params.gravity = Gravity.RIGHT;
-        params.setMargins(0, dp(20), 0, dp(14));
+        params.setMargins(0, dp(8), 0, dp(14));
 
         layout.addView(button, params);
     }
@@ -1012,11 +1012,11 @@ public class MainActivity extends Activity {
         // Compact BACK button aligned to the upper-left.
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
-                        dp(108),
-                        dp(44)
+                        dp(90),
+                        dp(40)
                 );
         params.gravity = Gravity.LEFT;
-        params.setMargins(0, dp(20), 0, dp(10));
+        params.setMargins(0, dp(8), 0, dp(10));
 
         layout.addView(button, params);
     }
