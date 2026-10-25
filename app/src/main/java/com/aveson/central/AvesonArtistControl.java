@@ -432,13 +432,6 @@ public class AvesonArtistControl {
 
         addSection(
                 layout,
-                "⚖️ Copyright & Cover Standards",
-                "Rights checks, beat ownership and cover quality rules",
-                v -> showReleaseStandards()
-        );
-
-        addSection(
-                layout,
                 "✅ Approved Releases",
                 "Approved music releases",
                 v -> showReleaseList("APPROVED")
@@ -456,6 +449,13 @@ public class AvesonArtistControl {
                 "📊 Artist Analytics",
                 "Artist and release statistics",
                 v -> showAnalytics()
+        );
+
+        addSection(
+                layout,
+                "⚖️ Copyright & Cover Standards",
+                "Rights checks, beat ownership and cover quality rules",
+                v -> showReleaseStandards()
         );
 
         addSection(
@@ -731,7 +731,11 @@ public class AvesonArtistControl {
             addInfo(card, "Release", release.title);
             addInfo(card, "Artist", release.artist);
             addInfo(card, "Status", release.status);
-            addInfo(card, "Required checks", "Beat/instrument ownership, license, master and composition rights, samples, featuring consent, cover size and visual quality");
+            addInfo(card, "Rights & Cover Review", release.rightsReviewStatus);
+            addInfo(card, "Required checks", "WAV audio and playback integrity; beat/instrument license; master and composition rights; samples; featuring consent; cover dimensions and quality; cover content and image rights");
+            if (release.reason != null && !release.reason.trim().isEmpty()) {
+                addInfo(card, "Review / Rejection Reason", release.reason);
+            }
             if (release.coverName != null && !release.coverName.isEmpty()) {
                 addInfo(card, "Cover Art", release.coverName);
             }
@@ -931,6 +935,7 @@ public class AvesonArtistControl {
 
         LinearLayout outcomeCard = createCard();
         addInfo(outcomeCard, "Possible outcomes", "APPROVED • REJECTED • NEEDS CORRECTION • RIGHTS HOLD");
+        addInfo(outcomeCard, "Approval lock", "A release cannot be approved unless its attached audio filename ends in .wav and staff has marked Rights & Cover Review VERIFIED. Staff must still listen to the audio and inspect cover and rights evidence; filename alone does not prove WAV integrity.");
         addInfo(outcomeCard, "Important", "An online match is a reason to investigate, not automatic proof of infringement. Reject when unauthorized use or a rights conflict is established, or when required rights cannot be demonstrated. Apply AVESON's stated cover-content and AI-art rules consistently, and write the exact reason in the staff decision.");
         layout.addView(outcomeCard);
 
@@ -967,6 +972,12 @@ public class AvesonArtistControl {
 
             addButton(
                     card,
+                    "RIGHTS & COVER REVIEW",
+                    v -> showRightsReview(index)
+            );
+
+            addButton(
+                    card,
                     "APPROVE RELEASE",
                     v -> updateReleaseStatus(index, "APPROVED", "")
             );
@@ -995,6 +1006,84 @@ public class AvesonArtistControl {
         addButton(layout, "← BACK", v -> showDashboard());
 
         showScreen(layout);
+    }
+
+    private void showRightsReview(int index) {
+        if (index < 0 || index >= releases.size()) {
+            showReleaseReview();
+            return;
+        }
+        Release release = releases.get(index);
+        LinearLayout layout = createRoot();
+        layout.addView(title("RIGHTS & COVER REVIEW"));
+        layout.addView(subtitle("Staff checklist • " + release.title));
+
+        LinearLayout card = createCard();
+        addInfo(card, "Artist", release.artist);
+        addInfo(card, "Audio file", release.audioName == null || release.audioName.isEmpty()
+                ? "NOT PROVIDED" : release.audioName);
+        addInfo(card, "Cover art", release.coverName == null || release.coverName.isEmpty()
+                ? "NOT PROVIDED" : release.coverName);
+        addInfo(card, "Rights review status", release.rightsReviewStatus);
+        addInfo(card, "Audio checks",
+                "Confirm the actual file is WAV, opens and plays correctly, is complete and has no obvious corruption. Filename alone is not proof of format or integrity.");
+        addInfo(card, "Copyright checks",
+                "Check beat/instrumental license, master recording rights, composition/lyrics rights, samples, featuring consent and any third-party material.");
+        addInfo(card, "Cover checks",
+                "Confirm at least 2900 × 2900 pixels, acceptable visual quality, no AI-generated art under AVESON policy, no unauthorized photos/artwork, ads, contact numbers, concert dates, +18 or political text. Artist name and song title must be visible. Add Parental Advisory at the bottom if explicit content requires it.");
+        addInfo(card, "Decision notes", release.rightsReviewNotes == null || release.rightsReviewNotes.isEmpty()
+                ? "No staff notes yet." : release.rightsReviewNotes);
+        layout.addView(card);
+
+        addButton(layout, "MARK CHECKS VERIFIED",
+                v -> showRightsReviewNotesDialog(index, "VERIFIED"));
+        addButton(layout, "RETURN FOR CORRECTION",
+                v -> showRightsReviewNotesDialog(index, "NEEDS_CORRECTION"));
+        addButton(layout, "REJECT FOR RIGHTS / QUALITY",
+                v -> showRightsReviewNotesDialog(index, "REJECTED"));
+        addButton(layout, "← BACK", v -> showReleaseReview());
+        showScreen(layout);
+    }
+
+    private void showRightsReviewNotesDialog(int index, String decision) {
+        if (index < 0 || index >= releases.size()) return;
+        EditText notesInput = new EditText(activity);
+        notesInput.setHint("Staff notes / exact reason");
+        notesInput.setMinLines(3);
+        notesInput.setText(releases.get(index).rightsReviewNotes == null
+                ? "" : releases.get(index).rightsReviewNotes);
+        String dialogTitle = "VERIFIED".equals(decision) ? "Confirm checks"
+                : ("NEEDS_CORRECTION".equals(decision) ? "Return for correction" : "Reject release");
+
+        new AlertDialog.Builder(activity)
+                .setTitle(dialogTitle)
+                .setMessage("Select VERIFIED only after actually checking audio, rights and cover.")
+                .setView(notesInput)
+                .setNegativeButton("CANCEL", null)
+                .setPositiveButton("SAVE", (dialog, which) -> {
+                    String notes = notesInput.getText().toString().trim();
+                    if (!"VERIFIED".equals(decision) && notes.isEmpty()) {
+                        Toast.makeText(activity, "Enter the reason or required corrections.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Release selected = releases.get(index);
+                    selected.rightsReviewStatus = decision;
+                    selected.rightsReviewNotes = notes;
+                    if ("REJECTED".equals(decision)) {
+                        selected.status = "REJECTED";
+                        selected.reason = notes;
+                    } else if ("NEEDS_CORRECTION".equals(decision)) {
+                        selected.status = "NEEDS_CORRECTION";
+                        selected.reason = notes;
+                    }
+                    saveData();
+                    if ("REJECTED".equals(decision) || "NEEDS_CORRECTION".equals(decision)) {
+                        showReleaseReview();
+                    } else {
+                        showRightsReview(index);
+                    }
+                })
+                .show();
     }
 
     private void showRejectDialog(int index) {
@@ -1031,8 +1120,24 @@ public class AvesonArtistControl {
             return;
         }
 
-        releases.get(index).status = status;
-        releases.get(index).reason = reason;
+        Release selected = releases.get(index);
+        if ("APPROVED".equals(status)) {
+            String audioName = selected.audioName == null ? "" : selected.audioName.trim();
+            if (audioName.isEmpty() || !audioName.toLowerCase(java.util.Locale.ROOT).endsWith(".wav")) {
+                Toast.makeText(activity,
+                        "Cannot approve: a WAV audio file must be attached first.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!"VERIFIED".equals(selected.rightsReviewStatus)) {
+                Toast.makeText(activity,
+                        "Cannot approve: complete RIGHTS & COVER REVIEW and mark checks VERIFIED first.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+        selected.status = status;
+        selected.reason = reason;
         saveData();
 
         Toast.makeText(
