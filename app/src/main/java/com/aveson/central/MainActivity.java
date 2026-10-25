@@ -1151,7 +1151,7 @@ public class MainActivity extends Activity {
                 0,
                 dp(10),
                 0,
-                dp(14)
+                dp(10)
         );
 
         card.setLayoutParams(params);
