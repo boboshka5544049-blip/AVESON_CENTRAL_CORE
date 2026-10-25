@@ -88,6 +88,18 @@ public class AvesonArtistControl {
                 release.reason = item.optString("reason", "");
                 release.audioUri = item.optString("audioUri", "");
                 release.audioName = item.optString("audioName", "");
+                release.coverUri = item.optString("coverUri", "");
+                release.coverName = item.optString("coverName", "");
+                release.rightsDeclaration = item.optString("rightsDeclaration", "");
+                release.beatLicense = item.optString("beatLicense", "");
+                release.masterRights = item.optString("masterRights", "");
+                release.compositionRights = item.optString("compositionRights", "");
+                release.sampleDeclaration = item.optString("sampleDeclaration", "");
+                release.featureConsent = item.optString("featureConsent", "");
+                release.rightsDocumentUri = item.optString("rightsDocumentUri", "");
+                release.rightsDocumentName = item.optString("rightsDocumentName", "");
+                release.rightsReviewStatus = item.optString("rightsReviewStatus", "NOT_REVIEWED");
+                release.rightsReviewNotes = item.optString("rightsReviewNotes", "");
                 releases.add(release);
             }
         } catch (Exception e) {
@@ -119,6 +131,18 @@ public class AvesonArtistControl {
                 item.put("reason", release.reason);
                 item.put("audioUri", release.audioUri);
                 item.put("audioName", release.audioName);
+                item.put("coverUri", release.coverUri);
+                item.put("coverName", release.coverName);
+                item.put("rightsDeclaration", release.rightsDeclaration);
+                item.put("beatLicense", release.beatLicense);
+                item.put("masterRights", release.masterRights);
+                item.put("compositionRights", release.compositionRights);
+                item.put("sampleDeclaration", release.sampleDeclaration);
+                item.put("featureConsent", release.featureConsent);
+                item.put("rightsDocumentUri", release.rightsDocumentUri);
+                item.put("rightsDocumentName", release.rightsDocumentName);
+                item.put("rightsReviewStatus", release.rightsReviewStatus);
+                item.put("rightsReviewNotes", release.rightsReviewNotes);
                 releaseArray.put(item);
             }
 
@@ -304,6 +328,18 @@ public class AvesonArtistControl {
         String reason;
         String audioUri = "";
         String audioName = "";
+        String coverUri = "";
+        String coverName = "";
+        String rightsDeclaration = "";
+        String beatLicense = "";
+        String masterRights = "";
+        String compositionRights = "";
+        String sampleDeclaration = "";
+        String featureConsent = "";
+        String rightsDocumentUri = "";
+        String rightsDocumentName = "";
+        String rightsReviewStatus = "NOT_REVIEWED";
+        String rightsReviewNotes = "";
 
         Release(String title, String artist) {
             this.title = title;
@@ -392,6 +428,13 @@ public class AvesonArtistControl {
                 "🔍 Release Review",
                 "Review pending releases",
                 v -> showReleaseReview()
+        );
+
+        addSection(
+                layout,
+                "⚖️ Copyright & Cover Standards",
+                "Rights checks, beat ownership and cover quality rules",
+                v -> showReleaseStandards()
         );
 
         addSection(
@@ -688,6 +731,13 @@ public class AvesonArtistControl {
             addInfo(card, "Release", release.title);
             addInfo(card, "Artist", release.artist);
             addInfo(card, "Status", release.status);
+            addInfo(card, "Required checks", "Beat/instrument ownership, license, master and composition rights, samples, featuring consent, cover size and visual quality");
+            if (release.coverName != null && !release.coverName.isEmpty()) {
+                addInfo(card, "Cover Art", release.coverName);
+            }
+            if (release.rightsReviewStatus != null && !"NOT_REVIEWED".equals(release.rightsReviewStatus)) {
+                addInfo(card, "Rights Review", release.rightsReviewStatus);
+            }
             if (release.audioName != null && !release.audioName.isEmpty()) {
                 addInfo(card, "Audio File", release.audioName);
             }
@@ -843,6 +893,49 @@ public class AvesonArtistControl {
             if (cursor != null) cursor.close();
         }
         return uri.getLastPathSegment();
+    }
+
+    private void showReleaseStandards() {
+        LinearLayout layout = createRoot();
+        layout.addView(title("COPYRIGHT & COVER STANDARDS"));
+        layout.addView(subtitle("AVESON ARTIST CONTROL • Staff review policy"));
+
+        LinearLayout rightsCard = createCard();
+        addInfo(rightsCard, "1. Third-party beat / instrumental", 
+                "If the artist uses another person's beat or instrumental, the artist must provide valid permission or a license covering the intended use. If rights cannot be confirmed, reject the release or return it for correction.");
+        addInfo(rightsCard, "2. Beat already released online", 
+                "If the beat appears online under another creator's name, staff must check ownership, license terms and any rights conflict. If the artist cannot demonstrate authorized use, or a rights conflict is confirmed, reject the release.");
+        addInfo(rightsCard, "3. Rights and permissions", 
+                "Check master recording rights, composition/lyrics rights, beat license, samples and required featuring/performer consent. Uploaded documents are evidence for review; their presence alone does not prove ownership.");
+        addInfo(rightsCard, "4. Cover dimensions", 
+                "Cover art must be at least 2900 × 2900 pixels. Artwork below either minimum dimension does not meet AVESON's cover standard and must be rejected or returned for correction.");
+        addInfo(rightsCard, "5. Cover image quality", 
+                "Reject or return artwork that is extremely blurry, pixelated, distorted, damaged, unreadable or otherwise clearly below acceptable visual quality.");
+        addInfo(rightsCard, "6. Audio format and integrity",
+                "Audio must be supplied in WAV format. Reject or return a file that is not WAV, is corrupted, cannot be opened or played correctly, is incomplete, or has obvious technical damage. Staff must verify the actual file and playback; do not rely only on its filename.");
+        addInfo(rightsCard, "7. Copyright in music",
+                "Do not approve music that unlawfully uses another person's composition, recording, beat, instrumental, sample or other protected material. Ask for applicable permission or license and record the evidence reviewed. If unauthorized use or an unresolved rights conflict is established, reject the release.");
+        addInfo(rightsCard, "8. AI-generated cover art",
+                "Under this AVESON policy, cover art created using AI must be rejected. Staff should record this as the rejection reason when confirmed.");
+        addInfo(rightsCard, "9. Cover photo and image rights",
+                "Reject cover art that uses another person's photograph, artwork, logo or other protected image without the required authorization. A photo being available on the internet does not itself grant permission to use it.");
+        addInfo(rightsCard, "10. Prohibited cover content",
+                "Cover art must not contain advertisements, promotional phone numbers or other contact numbers, concert dates, or +18/adult content. Political words, slogans or political messaging are also not allowed under this AVESON cover policy. Reject or return artwork containing these items.");
+        addInfo(rightsCard, "11. Required cover text",
+                "The cover must clearly display the artist's stage name or artist name and the track/song title. Check that both are readable and spelled correctly.");
+        addInfo(rightsCard, "12. Parental Advisory",
+                "If the song contains explicit lyrics or content unsuitable for younger listeners, the cover must include a clearly visible Parental Advisory label in a separate area along the bottom of the cover. Staff should check that the label is present when required.");
+        addInfo(rightsCard, "13. Staff decision",
+                "Record a specific reason for rejection or correction. Approve only after rights, audio format/integrity, metadata and cover checks are complete.");
+        layout.addView(rightsCard);
+
+        LinearLayout outcomeCard = createCard();
+        addInfo(outcomeCard, "Possible outcomes", "APPROVED • REJECTED • NEEDS CORRECTION • RIGHTS HOLD");
+        addInfo(outcomeCard, "Important", "An online match is a reason to investigate, not automatic proof of infringement. Reject when unauthorized use or a rights conflict is established, or when required rights cannot be demonstrated. Apply AVESON's stated cover-content and AI-art rules consistently, and write the exact reason in the staff decision.");
+        layout.addView(outcomeCard);
+
+        addButton(layout, "← BACK", v -> showDashboard());
+        showScreen(layout);
     }
 
     private void showReleaseReview() {
