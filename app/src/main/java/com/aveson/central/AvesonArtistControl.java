@@ -3,6 +3,8 @@ package com.aveson.central;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.BitmapFactory;
+import java.io.InputStream;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.View;
@@ -43,6 +45,10 @@ public class AvesonArtistControl {
     private final SharedPreferences preferences;
 
     private static final int REQUEST_AUDIO_FILE = 7412;
+    private static final int REQUEST_COVER_FILE = 7413;
+    private Uri pendingCoverUri;
+    private String pendingCoverName = "";
+    private TextView pendingCoverLabel;
     private String pendingReleaseArtist = "";
     private EditText pendingReleaseTitleInput;
     private TextView pendingAudioLabel;
@@ -745,6 +751,15 @@ public class AvesonArtistControl {
             if (release.audioName != null && !release.audioName.isEmpty()) {
                 addInfo(card, "Audio File", release.audioName);
             }
+            if (release.rightsDeclaration != null && !release.rightsDeclaration.isEmpty()) {
+                addInfo(card, "Artist Rights Declaration", release.rightsDeclaration);
+            }
+            if (release.beatLicense != null && !release.beatLicense.isEmpty()) {
+                addInfo(card, "Beat / Instrumental License", release.beatLicense);
+            }
+            if (release.sampleDeclaration != null && !release.sampleDeclaration.isEmpty()) {
+                addInfo(card, "Samples / Featuring", release.sampleDeclaration);
+            }
 
             layout.addView(card);
         }
@@ -814,6 +829,44 @@ public class AvesonArtistControl {
         });
         form.addView(chooseAudio);
 
+        TextView coverLabel = new TextView(activity);
+        coverLabel.setText("No cover art selected");
+        coverLabel.setTextColor(GRAY);
+        coverLabel.setPadding(0, dp(12), 0, dp(8));
+        form.addView(coverLabel);
+
+        Button chooseCover = createButton("CHOOSE COVER ART");
+        chooseCover.setOnClickListener(v -> {
+            pendingReleaseArtist = artistName;
+            pendingReleaseTitleInput = input;
+            pendingAudioLabel = audioLabel;
+            pendingCoverLabel = coverLabel;
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("image/*");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            try {
+                activity.startActivityForResult(intent, REQUEST_COVER_FILE);
+            } catch (Exception e) {
+                Toast.makeText(activity, "Unable to open cover picker.", Toast.LENGTH_LONG).show();
+            }
+        });
+        form.addView(chooseCover);
+
+        EditText rightsDeclarationInput = new EditText(activity);
+        rightsDeclarationInput.setHint("Rights declaration (ownership / permissions)");
+        rightsDeclarationInput.setMinLines(2);
+        form.addView(rightsDeclarationInput);
+
+        EditText beatLicenseInput = new EditText(activity);
+        beatLicenseInput.setHint("Beat / instrumental license details (if used)");
+        form.addView(beatLicenseInput);
+
+        EditText sampleInput = new EditText(activity);
+        sampleInput.setHint("Samples and featuring permissions");
+        form.addView(sampleInput);
+
         new AlertDialog.Builder(activity)
                 .setTitle("New Music Submission")
                 .setMessage("Artist: " + artistName)
@@ -832,6 +885,15 @@ public class AvesonArtistControl {
                         release.audioUri = pendingAudioUri.toString();
                         release.audioName = pendingAudioName;
                     }
+                    if (pendingReleaseArtist.equals(artistName)
+                            && pendingReleaseTitleInput == input
+                            && pendingCoverUri != null) {
+                        release.coverUri = pendingCoverUri.toString();
+                        release.coverName = pendingCoverName;
+                    }
+                    release.rightsDeclaration = rightsDeclarationInput.getText().toString().trim();
+                    release.beatLicense = beatLicenseInput.getText().toString().trim();
+                    release.sampleDeclaration = sampleInput.getText().toString().trim();
                     releases.add(release);
                     saveData();
                     clearPendingAudioForm();
@@ -846,6 +908,9 @@ public class AvesonArtistControl {
         pendingAudioLabel = audioLabel;
         pendingAudioUri = null;
         pendingAudioName = "";
+        pendingCoverUri = null;
+        pendingCoverName = "";
+        pendingCoverLabel = null;
     }
 
     private void clearPendingAudioForm() {
@@ -854,11 +919,14 @@ public class AvesonArtistControl {
         pendingAudioLabel = null;
         pendingAudioUri = null;
         pendingAudioName = "";
+        pendingCoverUri = null;
+        pendingCoverName = "";
+        pendingCoverLabel = null;
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != REQUEST_AUDIO_FILE || resultCode != Activity.RESULT_OK
-                || data == null || data.getData() == null) {
+        if ((requestCode != REQUEST_AUDIO_FILE && requestCode != REQUEST_COVER_FILE)
+                || resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
             return;
         }
 
@@ -870,16 +938,26 @@ public class AvesonArtistControl {
             // Some document providers do not support persistable permissions.
         }
 
-        pendingAudioUri = uri;
-        pendingAudioName = getDisplayName(uri);
-        if (pendingAudioName == null || pendingAudioName.trim().isEmpty()) {
-            pendingAudioName = "Selected audio file";
+        String displayName = getDisplayName(uri);
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = "Selected file";
         }
 
-        if (pendingAudioLabel != null) {
-            pendingAudioLabel.setText("Selected audio: " + pendingAudioName);
+        if (requestCode == REQUEST_AUDIO_FILE) {
+            pendingAudioUri = uri;
+            pendingAudioName = displayName;
+            if (pendingAudioLabel != null) {
+                pendingAudioLabel.setText("Selected audio: " + pendingAudioName);
+            }
+            Toast.makeText(activity, "Audio file selected", Toast.LENGTH_SHORT).show();
+        } else {
+            pendingCoverUri = uri;
+            pendingCoverName = displayName;
+            if (pendingCoverLabel != null) {
+                pendingCoverLabel.setText("Selected cover: " + pendingCoverName);
+            }
+            Toast.makeText(activity, "Cover art selected", Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(activity, "Audio file selected", Toast.LENGTH_SHORT).show();
     }
 
     private String getDisplayName(Uri uri) {
@@ -1008,6 +1086,10 @@ public class AvesonArtistControl {
         showScreen(layout);
     }
 
+    private String emptyAsNotProvided(String value) {
+        return value == null || value.trim().isEmpty() ? "NOT PROVIDED" : value;
+    }
+
     private void showRightsReview(int index) {
         if (index < 0 || index >= releases.size()) {
             showReleaseReview();
@@ -1025,6 +1107,9 @@ public class AvesonArtistControl {
         addInfo(card, "Cover art", release.coverName == null || release.coverName.isEmpty()
                 ? "NOT PROVIDED" : release.coverName);
         addInfo(card, "Rights review status", release.rightsReviewStatus);
+        addInfo(card, "Artist rights declaration", emptyAsNotProvided(release.rightsDeclaration));
+        addInfo(card, "Beat / instrumental license", emptyAsNotProvided(release.beatLicense));
+        addInfo(card, "Samples / featuring declaration", emptyAsNotProvided(release.sampleDeclaration));
         addInfo(card, "Audio checks",
                 "Confirm the actual file is WAV, opens and plays correctly, is complete and has no obvious corruption. Filename alone is not proof of format or integrity.");
         addInfo(card, "Copyright checks",
@@ -1111,6 +1196,49 @@ public class AvesonArtistControl {
                 .show();
     }
 
+    private boolean hasValidWavHeader(String uriString) {
+        if (uriString == null || uriString.trim().isEmpty()) return false;
+        InputStream input = null;
+        try {
+            input = activity.getContentResolver().openInputStream(Uri.parse(uriString));
+            if (input == null) return false;
+            byte[] header = new byte[12];
+            int offset = 0;
+            while (offset < header.length) {
+                int read = input.read(header, offset, header.length - offset);
+                if (read < 0) return false;
+                offset += read;
+            }
+            return header[0] == 'R' && header[1] == 'I'
+                    && header[2] == 'F' && header[3] == 'F'
+                    && header[8] == 'W' && header[9] == 'A'
+                    && header[10] == 'V' && header[11] == 'E';
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try { if (input != null) input.close(); } catch (Exception ignored) {}
+        }
+    }
+
+    private boolean isCoverAtLeast2900(String uriString) {
+        if (uriString == null || uriString.trim().isEmpty()) return false;
+        InputStream input = null;
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            input = activity.getContentResolver().openInputStream(Uri.parse(uriString));
+            if (input == null) return false;
+            BitmapFactory.decodeStream(input, null, options);
+            input.close();
+            input = null;
+            return options.outWidth >= 2900 && options.outHeight >= 2900;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try { if (input != null) input.close(); } catch (Exception ignored) {}
+        }
+    }
+
     private void updateReleaseStatus(
             int index,
             String status,
@@ -1126,6 +1254,24 @@ public class AvesonArtistControl {
             if (audioName.isEmpty() || !audioName.toLowerCase(java.util.Locale.ROOT).endsWith(".wav")) {
                 Toast.makeText(activity,
                         "Cannot approve: a WAV audio file must be attached first.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!hasValidWavHeader(selected.audioUri)) {
+                Toast.makeText(activity,
+                        "Cannot approve: the selected audio does not have a valid WAV RIFF/WAVE header.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (selected.coverUri == null || selected.coverUri.trim().isEmpty()) {
+                Toast.makeText(activity,
+                        "Cannot approve: cover art must be attached and reviewed first.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!isCoverAtLeast2900(selected.coverUri)) {
+                Toast.makeText(activity,
+                        "Cannot approve: cover art must be at least 2900 x 2900 pixels and readable.",
                         Toast.LENGTH_LONG).show();
                 return;
             }
