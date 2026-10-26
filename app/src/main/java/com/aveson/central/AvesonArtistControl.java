@@ -74,11 +74,15 @@ public class AvesonArtistControl {
             );
             for (int i = 0; i < artistArray.length(); i++) {
                 JSONObject item = artistArray.getJSONObject(i);
-                artists.add(new Artist(
+                Artist artist = new Artist(
                         item.optString("name", ""),
                         item.optString("genre", ""),
                         item.optString("email", "")
-                ));
+                );
+                // Existing saved artists remain approved for backward compatibility.
+                artist.status = item.optString("status", "APPROVED");
+                artist.reviewNotes = item.optString("reviewNotes", "");
+                artists.add(artist);
             }
 
             JSONArray releaseArray = new JSONArray(
@@ -125,6 +129,8 @@ public class AvesonArtistControl {
                 item.put("name", artist.name);
                 item.put("genre", artist.genre);
                 item.put("email", artist.email);
+                item.put("status", artist.status);
+                item.put("reviewNotes", artist.reviewNotes);
                 artistArray.put(item);
             }
 
@@ -319,6 +325,8 @@ public class AvesonArtistControl {
         String name;
         String genre;
         String email;
+        String status = "PENDING";
+        String reviewNotes = "";
 
         Artist(String name, String genre, String email) {
             this.name = name;
@@ -376,8 +384,8 @@ public class AvesonArtistControl {
 
         addInfo(
                 overview,
-                "Registered Artists",
-                String.valueOf(artists.size())
+                "Approved Artist Profiles",
+                String.valueOf(countArtistStatus("APPROVED"))
         );
 
         addInfo(
@@ -480,60 +488,82 @@ public class AvesonArtistControl {
 
     private void showArtistManagement() {
         LinearLayout layout = createRoot();
-
         layout.addView(title("ARTIST MANAGEMENT"));
-        layout.addView(subtitle("Manage artist records"));
+        layout.addView(subtitle("Profile applications • staff review"));
+        addButton(layout, "+ ADD PROFILE APPLICATION", v -> showAddArtistDialog());
 
-        addButton(
-                layout,
-                "+ ADD ARTIST",
-                v -> showAddArtistDialog()
-        );
+        int pending = 0;
+        int approved = 0;
+        for (Artist artist : artists) {
+            if ("PENDING".equals(artist.status)) pending++;
+            if ("APPROVED".equals(artist.status)) approved++;
+        }
+        LinearLayout summary = createCard();
+        addInfo(summary, "Pending profile applications", String.valueOf(pending));
+        addInfo(summary, "Approved artist profiles", String.valueOf(approved));
+        layout.addView(summary);
 
         if (artists.isEmpty()) {
             LinearLayout card = createCard();
-
-            addInfo(
-                    card,
-                    "Artist List",
-                    "No artists have been added yet."
-            );
-
+            addInfo(card, "Artist Applications", "No profile applications have been added.");
             layout.addView(card);
         }
 
         for (int i = 0; i < artists.size(); i++) {
             final int index = i;
             Artist artist = artists.get(i);
-
             LinearLayout card = createCard();
-
             addInfo(card, "Artist", artist.name);
             addInfo(card, "Genre", artist.genre);
             addInfo(card, "Email", artist.email);
-
-            addButton(
-                    card,
-                    "VIEW PROFILE",
-                    v -> showArtistProfile(index)
-            );
-
-            addButton(
-                    card,
-                    "DELETE ARTIST",
-                    v -> confirmDeleteArtist(index)
-            );
-
+            addInfo(card, "Profile status", artist.status);
+            if (artist.reviewNotes != null && !artist.reviewNotes.trim().isEmpty()) {
+                addInfo(card, "Staff notes", artist.reviewNotes);
+            }
+            addButton(card, "VIEW PROFILE", v -> showArtistProfile(index));
+            if ("PENDING".equals(artist.status)) {
+                addButton(card, "APPROVE PROFILE", v -> updateArtistProfileStatus(index, "APPROVED"));
+                addButton(card, "REJECT PROFILE", v -> showRejectArtistDialog(index));
+            }
+            addButton(card, "DELETE ARTIST", v -> confirmDeleteArtist(index));
             layout.addView(card);
         }
-
-        addButton(
-                layout,
-                "← BACK",
-                v -> showDashboard()
-        );
-
+        addButton(layout, "← BACK", v -> showDashboard());
         showScreen(layout);
+    }
+
+    private void updateArtistProfileStatus(int index, String status) {
+        if (index < 0 || index >= artists.size()) return;
+        Artist artist = artists.get(index);
+        artist.status = status;
+        if ("APPROVED".equals(status)) artist.reviewNotes = "";
+        saveData();
+        Toast.makeText(activity, "Artist profile status: " + status, Toast.LENGTH_SHORT).show();
+        showArtistManagement();
+    }
+
+    private void showRejectArtistDialog(int index) {
+        if (index < 0 || index >= artists.size()) return;
+        EditText reasonInput = new EditText(activity);
+        reasonInput.setHint("Reason for rejection / required corrections");
+        reasonInput.setMinLines(2);
+        new AlertDialog.Builder(activity)
+                .setTitle("Reject Artist Profile")
+                .setView(reasonInput)
+                .setNegativeButton("CANCEL", null)
+                .setPositiveButton("REJECT", (dialog, which) -> {
+                    String reason = reasonInput.getText().toString().trim();
+                    if (reason.isEmpty()) {
+                        Toast.makeText(activity, "Enter a reason for rejection.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Artist artist = artists.get(index);
+                    artist.status = "REJECTED";
+                    artist.reviewNotes = reason;
+                    saveData();
+                    showArtistManagement();
+                })
+                .show();
     }
 
     private void showAddArtistDialog() {
@@ -580,9 +610,9 @@ public class AvesonArtistControl {
                         return;
                     }
 
-                    artists.add(
-                            new Artist(name, genre, email)
-                    );
+                    Artist applicant = new Artist(name, genre, email);
+                    applicant.status = "PENDING";
+                    artists.add(applicant);
                     saveData();
 
                     Toast.makeText(
@@ -617,38 +647,24 @@ public class AvesonArtistControl {
 
     private void showArtistProfiles() {
         LinearLayout layout = createRoot();
-
         layout.addView(title("ARTIST PROFILES"));
-        layout.addView(subtitle("Artist directory"));
-
-        if (artists.isEmpty()) {
+        layout.addView(subtitle("Approved artist directory"));
+        int approvedCount = 0;
+        for (Artist artist : artists) if ("APPROVED".equals(artist.status)) approvedCount++;
+        if (approvedCount == 0) {
             LinearLayout card = createCard();
-
-            addInfo(
-                    card,
-                    "Profiles",
-                    "Add artists in Artist Management first."
-            );
-
+            addInfo(card, "Approved Profiles", "No approved artist profiles yet. Review applications in Artist Management.");
             layout.addView(card);
         }
-
         for (int i = 0; i < artists.size(); i++) {
             final int index = i;
             Artist artist = artists.get(i);
-
-            addSection(
-                    layout,
-                    artist.name,
-                    artist.genre.isEmpty()
-                            ? "Genre not specified"
-                            : artist.genre,
-                    v -> showArtistProfile(index)
-            );
+            if (!"APPROVED".equals(artist.status)) continue;
+            addSection(layout, artist.name,
+                    artist.genre.isEmpty() ? "Genre not specified" : artist.genre,
+                    v -> showArtistProfile(index));
         }
-
         addButton(layout, "← BACK", v -> showDashboard());
-
         showScreen(layout);
     }
 
@@ -686,17 +702,13 @@ public class AvesonArtistControl {
 
         layout.addView(card);
 
-        addButton(
-                layout,
-                "+ SUBMIT RELEASE",
-                v -> showAddReleaseDialog(artist.name)
-        );
+        if ("APPROVED".equals(artist.status)) {
+            addButton(layout, "+ SUBMIT RELEASE", v -> showAddReleaseDialog(artist.name));
+        } else {
+            addInfo(card, "Submission access", "Only approved artist profiles can submit releases.");
+        }
 
-        addButton(
-                layout,
-                "← BACK",
-                v -> showArtistManagement()
-        );
+        addButton(layout, "← BACK", v -> showArtistProfiles());
 
         showScreen(layout);
     }
@@ -770,28 +782,22 @@ public class AvesonArtistControl {
     }
 
     private void showChooseArtistDialog() {
-        if (artists.isEmpty()) {
+        ArrayList<String> approvedNames = new ArrayList<>();
+        for (Artist artist : artists) {
+            if ("APPROVED".equals(artist.status)) approvedNames.add(artist.name);
+        }
+        if (approvedNames.isEmpty()) {
             new AlertDialog.Builder(activity)
-                    .setTitle("No Artists")
-                    .setMessage(
-                            "Add an artist before submitting music."
-                    )
+                    .setTitle("No Approved Artists")
+                    .setMessage("Approve an artist profile in Artist Management before submitting music.")
                     .setPositiveButton("OK", null)
                     .show();
             return;
         }
-
-        String[] names = new String[artists.size()];
-
-        for (int i = 0; i < artists.size(); i++) {
-            names[i] = artists.get(i).name;
-        }
-
+        String[] names = approvedNames.toArray(new String[0]);
         new AlertDialog.Builder(activity)
-                .setTitle("Choose Artist")
-                .setItems(names, (dialog, which) ->
-                        showAddReleaseDialog(names[which])
-                )
+                .setTitle("Choose Approved Artist")
+                .setItems(names, (dialog, which) -> showAddReleaseDialog(names[which]))
                 .show();
     }
 
@@ -1358,6 +1364,12 @@ public class AvesonArtistControl {
     // ANALYTICS
     // =========================================
 
+    private int countArtistStatus(String status) {
+        int count = 0;
+        for (Artist artist : artists) if (status.equals(artist.status)) count++;
+        return count;
+    }
+
     private int countStatus(String status) {
         int count = 0;
 
@@ -1380,8 +1392,8 @@ public class AvesonArtistControl {
 
         addInfo(
                 card,
-                "Registered Artists",
-                String.valueOf(artists.size())
+                "Approved Artist Profiles",
+                String.valueOf(countArtistStatus("APPROVED"))
         );
 
         addInfo(
