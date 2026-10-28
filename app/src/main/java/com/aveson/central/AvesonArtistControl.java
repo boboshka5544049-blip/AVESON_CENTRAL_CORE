@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.BitmapFactory;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.View;
@@ -46,6 +48,8 @@ public class AvesonArtistControl {
 
     private static final int REQUEST_AUDIO_FILE = 7412;
     private static final int REQUEST_COVER_FILE = 7413;
+    private static final int REQUEST_BACKUP_EXPORT = 7414;
+    private static final int REQUEST_BACKUP_IMPORT = 7415;
     private Uri pendingCoverUri;
     private String pendingCoverName = "";
     private TextView pendingCoverLabel;
@@ -931,8 +935,19 @@ public class AvesonArtistControl {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((requestCode != REQUEST_AUDIO_FILE && requestCode != REQUEST_COVER_FILE)
-                || resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
+        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
+            return;
+        }
+
+        if (requestCode == REQUEST_BACKUP_EXPORT) {
+            writeBackupToUri(data.getData());
+            return;
+        }
+        if (requestCode == REQUEST_BACKUP_IMPORT) {
+            readBackupFromUri(data.getData());
+            return;
+        }
+        if (requestCode != REQUEST_AUDIO_FILE && requestCode != REQUEST_COVER_FILE) {
             return;
         }
 
@@ -1428,6 +1443,100 @@ public class AvesonArtistControl {
     }
 
     // =========================================
+    // LOCAL BACKUP / RESTORE
+    // =========================================
+
+    private void exportBackup() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, "aveson_artist_control_backup.json");
+        try {
+            activity.startActivityForResult(intent, REQUEST_BACKUP_EXPORT);
+        } catch (Exception e) {
+            Toast.makeText(activity, "Unable to open backup save dialog.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void writeBackupToUri(Uri uri) {
+        OutputStream output = null;
+        try {
+            JSONObject backup = new JSONObject();
+            backup.put("backupType", "AVESON_ARTIST_CONTROL_BACKUP");
+            backup.put("backupVersion", 1);
+            backup.put("createdAt", System.currentTimeMillis());
+            backup.put("artists", preferences.getString("artists", "[]"));
+            backup.put("releases", preferences.getString("releases", "[]"));
+
+            output = activity.getContentResolver().openOutputStream(uri, "wt");
+            if (output == null) throw new Exception("Could not open backup file.");
+            output.write(backup.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            output.flush();
+
+            Toast.makeText(activity, "Backup saved. Keep this file in a safe place.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(activity, "Backup failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            try { if (output != null) output.close(); } catch (Exception ignored) {}
+        }
+    }
+
+    private void confirmImportBackup() {
+        new AlertDialog.Builder(activity)
+                .setTitle("Restore from backup")
+                .setMessage("Restoring replaces the artist and release records currently stored on this device. Export a backup of the current data first. Audio and cover files themselves are not included.")
+                .setNegativeButton("CANCEL", null)
+                .setPositiveButton("CHOOSE BACKUP", (dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("application/json");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        activity.startActivityForResult(intent, REQUEST_BACKUP_IMPORT);
+                    } catch (Exception e) {
+                        Toast.makeText(activity, "Unable to open backup picker.", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .show();
+    }
+
+    private void readBackupFromUri(Uri uri) {
+        InputStream input = null;
+        try {
+            input = activity.getContentResolver().openInputStream(uri);
+            if (input == null) throw new Exception("Could not read selected backup.");
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            int count;
+            while ((count = input.read(chunk)) != -1) buffer.write(chunk, 0, count);
+
+            JSONObject backup = new JSONObject(
+                    new String(buffer.toByteArray(), java.nio.charset.StandardCharsets.UTF_8));
+            if (!"AVESON_ARTIST_CONTROL_BACKUP".equals(backup.optString("backupType", ""))) {
+                throw new Exception("This is not an AVESON Artist Control backup.");
+            }
+
+            String artistsJson = backup.optString("artists", "[]");
+            String releasesJson = backup.optString("releases", "[]");
+            // Validate both arrays before changing saved data.
+            new JSONArray(artistsJson);
+            new JSONArray(releasesJson);
+
+            preferences.edit()
+                    .putString("artists", artistsJson)
+                    .putString("releases", releasesJson)
+                    .commit();
+            loadData();
+            Toast.makeText(activity, "Backup restored.", Toast.LENGTH_LONG).show();
+            showDashboard();
+        } catch (Exception e) {
+            Toast.makeText(activity, "Restore failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            try { if (input != null) input.close(); } catch (Exception ignored) {}
+        }
+    }
+
+    // =========================================
     // SETTINGS
     // =========================================
 
@@ -1469,6 +1578,11 @@ public class AvesonArtistControl {
         );
 
         layout.addView(card);
+
+        addButton(layout, "BACK UP DATA", v -> exportBackup());
+        addButton(layout, "RESTORE DATA FROM BACKUP", v -> confirmImportBackup());
+        addInfo(card, "Backup reminder",
+                "Export a backup before uninstalling the app. Backups include artist/release records and file references, not the audio or cover files themselves.");
 
         addButton(layout, "← BACK", v -> showDashboard());
 
