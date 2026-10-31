@@ -84,7 +84,12 @@ public class MainActivity extends Activity {
     "AVESON ARTIST CONTROL",
     "Artist management & submissions",
     v -> {
+        // Mark Artist Control as active before showing its dashboard.
+        // Without this, system BACK incorrectly treats it as CENTRAL home.
         artistControl = new AvesonArtistControl(this);
+        artistControlActive = true;
+        isHomeScreen = false;
+        backPressedTime = 0L;
         artistControl.show();
     }
 );
