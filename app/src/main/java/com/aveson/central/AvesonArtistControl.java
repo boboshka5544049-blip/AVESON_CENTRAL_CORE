@@ -873,9 +873,24 @@ public class AvesonArtistControl {
         beatLicenseInput.setHint("Beat / instrumental license details (if used)");
         form.addView(beatLicenseInput);
 
+        EditText masterRightsInput = new EditText(activity);
+        masterRightsInput.setHint("Master recording rights (who owns / controls the master?)");
+        masterRightsInput.setMinLines(2);
+        form.addView(masterRightsInput);
+
+        EditText compositionRightsInput = new EditText(activity);
+        compositionRightsInput.setHint("Composition / lyrics rights (writers and ownership)");
+        compositionRightsInput.setMinLines(2);
+        form.addView(compositionRightsInput);
+
         EditText sampleInput = new EditText(activity);
-        sampleInput.setHint("Samples and featuring permissions");
+        sampleInput.setHint("Samples used? List each sample and its permission status");
         form.addView(sampleInput);
+
+        EditText featureConsentInput = new EditText(activity);
+        featureConsentInput.setHint("Featuring / performer consent (names and confirmation)");
+        featureConsentInput.setMinLines(2);
+        form.addView(featureConsentInput);
 
         new AlertDialog.Builder(activity)
                 .setTitle("New Music Submission")
@@ -903,7 +918,10 @@ public class AvesonArtistControl {
                     }
                     release.rightsDeclaration = rightsDeclarationInput.getText().toString().trim();
                     release.beatLicense = beatLicenseInput.getText().toString().trim();
+                    release.masterRights = masterRightsInput.getText().toString().trim();
+                    release.compositionRights = compositionRightsInput.getText().toString().trim();
                     release.sampleDeclaration = sampleInput.getText().toString().trim();
+                    release.featureConsent = featureConsentInput.getText().toString().trim();
                     releases.add(release);
                     saveData();
                     clearPendingAudioForm();
@@ -1130,7 +1148,10 @@ public class AvesonArtistControl {
         addInfo(card, "Rights review status", release.rightsReviewStatus);
         addInfo(card, "Artist rights declaration", emptyAsNotProvided(release.rightsDeclaration));
         addInfo(card, "Beat / instrumental license", emptyAsNotProvided(release.beatLicense));
-        addInfo(card, "Samples / featuring declaration", emptyAsNotProvided(release.sampleDeclaration));
+        addInfo(card, "Master recording rights", emptyAsNotProvided(release.masterRights));
+        addInfo(card, "Composition / lyrics rights", emptyAsNotProvided(release.compositionRights));
+        addInfo(card, "Samples declaration", emptyAsNotProvided(release.sampleDeclaration));
+        addInfo(card, "Featuring / performer consent", emptyAsNotProvided(release.featureConsent));
         addInfo(card, "Audio checks",
                 "Confirm the actual file is WAV, opens and plays correctly, is complete and has no obvious corruption. Filename alone is not proof of format or integrity.");
         addInfo(card, "Copyright checks",
