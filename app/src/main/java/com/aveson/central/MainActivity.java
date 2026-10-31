@@ -19,6 +19,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
     private AvesonArtistControl artistControl;
+    private boolean artistControlActive = false;
 
     private boolean isHomeScreen = false;
     private long backPressedTime = 0L;
@@ -193,6 +194,7 @@ public class MainActivity extends Activity {
                 createScroll(layout)
         );
         isHomeScreen = true;
+        artistControlActive = false;
         backPressedTime = 0L;
     }
 
@@ -793,6 +795,7 @@ public class MainActivity extends Activity {
 
     private void setScreen(View view) {
 
+        artistControlActive = false;
         setContentView(view);
         isHomeScreen = false;
     }
@@ -1234,6 +1237,15 @@ public class MainActivity extends Activity {
     }
 
     private void handleSystemBack() {
+
+        if (artistControlActive && artistControl != null) {
+            backPressedTime = 0L;
+            if (!artistControl.handleSystemBack()) {
+                artistControlActive = false;
+                showHome();
+            }
+            return;
+        }
 
         if (!isHomeScreen) {
             backPressedTime = 0L;
