@@ -5,16 +5,25 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Build;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
     private AvesonArtistControl artistControl;
+
+    private boolean isHomeScreen = false;
+    private long backPressedTime = 0L;
+    private static final long BACK_EXIT_INTERVAL = 2000L;
+    private OnBackInvokedCallback backInvokedCallback;
 
     private static final int DARK = Color.rgb(8, 8, 18);
     private static final int CARD = Color.rgb(16, 14, 32);
@@ -183,6 +192,8 @@ public class MainActivity extends Activity {
         setScreen(
                 createScroll(layout)
         );
+        isHomeScreen = true;
+        backPressedTime = 0L;
     }
 
     // ============================================================
@@ -783,6 +794,7 @@ public class MainActivity extends Activity {
     private void setScreen(View view) {
 
         setContentView(view);
+        isHomeScreen = false;
     }
 
     // ============================================================
@@ -1221,10 +1233,60 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void handleSystemBack() {
+
+        if (!isHomeScreen) {
+            backPressedTime = 0L;
+            showHome();
+            return;
+        }
+
+        long currentTime = System.currentTimeMillis();
+
+        if (backPressedTime != 0L
+                && currentTime - backPressedTime <= BACK_EXIT_INTERVAL) {
+            backPressedTime = 0L;
+            finishAffinity();
+        } else {
+            backPressedTime = currentTime;
+            Toast.makeText(
+                    this,
+                    "Press BACK again to exit",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+    }
+
     @Override
     public void onBackPressed() {
+        // Compatibility fallback for Android versions below API 33.
+        handleSystemBack();
+    }
 
-        showHome();
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Android 13+ uses the predictive-back dispatcher.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            backInvokedCallback = this::handleSystemBack;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    backInvokedCallback
+            );
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && backInvokedCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
+                    backInvokedCallback
+            );
+            backInvokedCallback = null;
+        }
+        super.onStop();
     }
 
     // ============================================================
@@ -1240,4 +1302,4 @@ public class MainActivity extends Activity {
                         .density
         );
     }
-}
+          }
