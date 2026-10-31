@@ -31,6 +31,8 @@ import java.util.ArrayList;
 public class AvesonArtistControl {
 
     private final Activity activity;
+    private final ArrayList<View> screenHistory = new ArrayList<>();
+    private boolean hasShownFirstScreen = false;
 
     private final int BACKGROUND = Color.rgb(8, 8, 18);
     private final int CARD = Color.rgb(17, 17, 32);
@@ -199,7 +201,28 @@ public class AvesonArtistControl {
     }
 
     private void showScreen(LinearLayout layout) {
-        activity.setContentView(createScroll(layout));
+        View nextScreen = createScroll(layout);
+
+        if (hasShownFirstScreen) {
+            android.view.ViewGroup content = activity.findViewById(android.R.id.content);
+            if (content != null && content.getChildCount() > 0) {
+                View currentScreen = content.getChildAt(0);
+                if (currentScreen != null) {
+                    // Detach before storing so Android can safely attach it again on BACK.
+                    content.removeView(currentScreen);
+                    screenHistory.add(currentScreen);
+                }
+            }
+        }
+
+        activity.setContentView(nextScreen);
+        hasShownFirstScreen = true;
+    }
+
+    private void goBack() {
+        if (!handleSystemBack()) {
+            showDashboard();
+        }
     }
 
     private TextView title(String text) {
@@ -372,8 +395,23 @@ public class AvesonArtistControl {
     // =========================================
 
     public void show() {
+        screenHistory.clear();
+        hasShownFirstScreen = false;
         showDashboard();
     }
+
+    /** Handles Android system BACK while Artist Control is visible.
+     * @return true when an internal Artist Control screen was popped.
+     */
+    public boolean handleSystemBack() {
+        if (!screenHistory.isEmpty()) {
+            View previous = screenHistory.remove(screenHistory.size() - 1);
+            activity.setContentView(previous);
+            return true;
+        }
+        return false;
+    }
+
 
     private void showDashboard() {
         LinearLayout layout = createRoot();
@@ -532,7 +570,7 @@ public class AvesonArtistControl {
             addButton(card, "DELETE ARTIST", v -> confirmDeleteArtist(index));
             layout.addView(card);
         }
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
         showScreen(layout);
     }
 
@@ -668,7 +706,7 @@ public class AvesonArtistControl {
                     artist.genre.isEmpty() ? "Genre not specified" : artist.genre,
                     v -> showArtistProfile(index));
         }
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
         showScreen(layout);
     }
 
@@ -712,7 +750,7 @@ public class AvesonArtistControl {
             addInfo(card, "Submission access", "Only approved artist profiles can submit releases.");
         }
 
-        addButton(layout, "← BACK", v -> showArtistProfiles());
+        addButton(layout, "← BACK", v -> goBack());
 
         showScreen(layout);
     }
@@ -780,7 +818,7 @@ public class AvesonArtistControl {
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
 
         showScreen(layout);
     }
@@ -1038,7 +1076,7 @@ public class AvesonArtistControl {
         addInfo(outcomeCard, "Important", "An online match is a reason to investigate, not automatic proof of infringement. Reject when unauthorized use or a rights conflict is established, or when required rights cannot be demonstrated. Apply AVESON's stated cover-content and AI-art rules consistently, and write the exact reason in the staff decision.");
         layout.addView(outcomeCard);
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
         showScreen(layout);
     }
 
@@ -1102,7 +1140,7 @@ public class AvesonArtistControl {
             layout.addView(card);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
 
         showScreen(layout);
     }
@@ -1147,7 +1185,7 @@ public class AvesonArtistControl {
                 v -> showRightsReviewNotesDialog(index, "NEEDS_CORRECTION"));
         addButton(layout, "REJECT FOR RIGHTS / QUALITY",
                 v -> showRightsReviewNotesDialog(index, "REJECTED"));
-        addButton(layout, "← BACK", v -> showReleaseReview());
+        addButton(layout, "← BACK", v -> goBack());
         showScreen(layout);
     }
 
@@ -1371,7 +1409,7 @@ public class AvesonArtistControl {
             layout.addView(emptyCard);
         }
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
         showScreen(layout);
     }
 
@@ -1437,7 +1475,7 @@ public class AvesonArtistControl {
 
         layout.addView(card);
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
 
         showScreen(layout);
     }
@@ -1584,7 +1622,7 @@ public class AvesonArtistControl {
         addInfo(card, "Backup reminder",
                 "Export a backup before uninstalling the app. Backups include artist/release records and file references, not the audio or cover files themselves.");
 
-        addButton(layout, "← BACK", v -> showDashboard());
+        addButton(layout, "← BACK", v -> goBack());
 
         showScreen(layout);
     }
